@@ -1,0 +1,12 @@
+{application, quest,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { quest_app, []}},
+  {env, []}
+ ]}.
