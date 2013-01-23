@@ -102,7 +102,10 @@ quest_list() ->
      {impure_list,        2, 2, "Answer with any impure list."},
      {answer_the_input,   2, 2, "Answer with the input given in the challenge."},
      {sum_of_numbers,     4, 3, "The input is a list of numbers.  Answer with their sum."},
-     {even_count,         4, 3, "The input is a list of integers.  Answer how many of them are even."}
+     {even_count,         4, 3, "The input is a list of integers.  Answer how many of them are even."},
+     {tuple_swap,         4, 2, "The input is a pair (2-tuple).  Answer with a pair with the same elements, but swapped."},
+     {tuple_rotate,      10, 5, "Given a tuple of an unknown arity, rotate the elements one place to the left."},
+     {primality_check,   10, 7, "Given a list of integers, answer with a list of booleans indicating whether the corresponding number is a prime."}
      ].
 
 any_answer() ->

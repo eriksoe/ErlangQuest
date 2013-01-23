@@ -29,6 +29,10 @@ help_text() ->
         "    Is equivalent to:\n"++
         "      {CID,_,_,Input}=quest:get_challenge(Username, QuestID),\n"++
         "      quest:answer_challenge(CID,SolutionFun(Input))\n"++
+        "\n"++
+        "Each quest has two levels: slow and fast.  You get points the first time you\n"++
+        "answer a challenge correctly (slow-level achievement), and the first time\n"++
+        "you answer correctly within 100ms (fast-level achievement).\n"++
         "".
 
 help() ->
