@@ -1,10 +1,11 @@
 ==== TO DO
-- Quest interface.
 - Basic quest_server.
-- First quest
 - Scoreboard
 - Active challenge expiry
 ...
+- Hint system?
 - web scoreboard
 
 ==== DONE
+- Quest interface.
+- First quest
