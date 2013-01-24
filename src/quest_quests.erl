@@ -25,13 +25,13 @@ quest_list() ->
       ["Given a boolean expression of the grammar:",
        "expr ::= a | b | c       % Variables",
        "       | true | false    % Constants",
-       "       | {not, <expr>} | {or, <expr>, <expr>} | {and, <expr>, <expr>}",
+       "       | {'not', <expr>} | {'or', <expr>, <expr>} | {'and', <expr>, <expr>}",
        "construct the truth table for the expression, containing the value",
        "of the expression for each of the 8 truth assignments to a, b and c.",
        "Examples:",
        "  a         -> [false,true,false,true,false,true,false,true]",
-       "  {not,c}   -> [true,true,true,true,false,false,false,false]",
-       "  {and,a,b} -> [false,false,false,true,false,false,false,true]."]}
+       "  {'not',c}   -> [true,true,true,true,false,false,false,false]",
+       "  {'and',a,b} -> [false,false,false,true,false,false,false,true]."]}
      ].
 
 any_answer() ->
@@ -69,10 +69,10 @@ boolean_evaluator() ->
     #quest{generate=fun() -> rnd_bool_exp(3+rnd_integer(10)) end,
            verify=fun(Exp,Answer) -> verify_boolean_evaluations(Exp,Answer) end}.
 verify_boolean_evaluations(Exp, Answer) ->
-    TF = [true,false],
-    Inputs = [{A,B,C} || A <- TF,
-                         B <- TF,
-                         C <- TF],
+    FT = [false,true],
+    Inputs = [{A,B,C} || C <- FT,
+                         B <- FT,
+                         A <- FT],
     (catch length(Answer))==8
         andalso lists:all(fun erlang:is_boolean/1, Answer)
         andalso lists:all(fun ({I,O})->verify_boolean_evaluation(Exp,I,O) end,
