@@ -41,7 +41,7 @@ help() ->
 list(Username) when is_atom(Username) ->
     Quests = gen_server:call(?SERVER, {list, Username}),
     io:format("Quests currently available to ~s:\n", [Username]),
-    io:format("   Pts  Quest\n"),
+    io:format("---Pts--Quest-----------\n"),
     lists:foreach(fun({Q,P}) -> io:format("  ~4b  ~s\n", [P,Q]) end,
                   Quests).
 
