@@ -18,7 +18,7 @@ quest_list() ->
      {sum_of_numbers,     8, 3, "Given a list of numbers, answer with their sum."},
      {even_count,         8, 3, "Given a list of integers, answer how many of them are even."},
      {tuple_swap,         8, 2, "Given a pair (2-tuple), answer with a pair with the same elements, but swapped."},
-     {base_7,            14, 5, "Given an integer, answer with a string containing the base 7 representation of the number."},
+     {base_7,            14, 5, "Given a positive integer, answer with a string containing the base 7 representation of the number."},
      {tuple_rotate,      20, 5, "Given a tuple of an unknown arity, rotate the elements one place to the left."},
      {primality_check,   20, 7, "Given a list of integers, answer with a list of booleans indicating whether the corresponding number is a prime."},
      {boolean_evaluator, 30, 15,
@@ -31,8 +31,22 @@ quest_list() ->
        "Examples:",
        "  a         -> [false,true,false,true,false,true,false,true]",
        "  {'not',c}   -> [true,true,true,true,false,false,false,false]",
-       "  {'and',a,b} -> [false,false,false,true,false,false,false,true]."]}
-     ].
+       "  {'and',a,b} -> [false,false,false,true,false,false,false,true]."]},
+     {closest_fraction1, 25, 10,
+      ["Given a pair {X,N} of a floating-point number X in [0;1] and an integer ",
+       "N in [1;100], find the fraction Enumerator/Denominator which is",
+       "the closest to X among all fractions with denominator =< N.",
+       "If there is more than one answer, pick the one with lowest Denominator.",
+       "Answer with the tuple {Enumerator,Denominator}.",
+       "Example: {0.36, 6} -> {1,3}."]},
+     {closest_fraction2, 30, 15,
+      ["Given a pair {X,N} of a floating-point number X in [0;1] and an integer ",
+       "N in [1;10^7], find the fraction Enumerator/Denominator which is",
+       "the closest to X among all fractions with denominator =< N.",
+       "If there is more than one answer, pick the one with lowest Denominator.",
+       "Answer with the tuple {Enumerator,Denominator}.",
+       "Example: {0.36, 6} -> {1,3}."]}
+    ].
 
 any_answer() ->
     #quest{generate=fun()->dummy end,
@@ -65,6 +79,27 @@ sum_of_numbers() ->
     #quest{generate=fun()->[rnd_integer() || _ <- lists:seq(1,5+rnd_integer(15))] end,
            verify=fun(Input,Answer) -> Answer==lists:sum(Input) end}.
 
+base_7() ->
+    #quest{generate=fun()->rnd_integer(10000) end,
+           verify=fun(Input,Answer) -> Answer==integer_to_list(Input,7) end}.
+
+tuple_rotate() ->
+    #quest{generate=fun()-> L = [char_atom() || _ <- lists:seq(1,5+rnd_integer(20))],
+                            list_to_tuple(L)
+                    end,
+           verify=fun(Input,Answer) ->
+                          N = tuple_size(Input),
+                          is_tuple(Answer)
+                              andalso tuple_size(Answer) == N
+                              andalso element(1,Input)==element(N,Answer)
+                              andalso lists:all(fun(I) ->
+                                                        element(I,Input)==element(I-1,Answer)
+                                                end,
+                                                lists:seq(2,N))
+                  end}.
+
+
+%%%----------
 boolean_evaluator() ->
     #quest{generate=fun() -> rnd_bool_exp(3+rnd_integer(10)) end,
            verify=fun(Exp,Answer) -> verify_boolean_evaluations(Exp,Answer) end}.
@@ -91,6 +126,7 @@ verify_boolean_evaluation({'and', E1, E2}, In, true) ->
     verify_boolean_evaluation(E1, In, true) andalso verify_boolean_evaluation(E2, In, true);
 verify_boolean_evaluation({'and', E1, E2}, In, false) ->
     verify_boolean_evaluation(E1, In, false) orelse verify_boolean_evaluation(E2, In, false).
+%%%----------
 
 
 %%%==================== Common generators ==============================
@@ -104,6 +140,9 @@ rnd_integer(N) ->
 semi_bignum() ->
     <<ID:64>> = crypto:rand_bytes(8),
     ID.
+
+char_atom() ->
+    list_to_atom([$a + rnd_integer(26)-1]).
 
 rnd_of(L) ->
     lists:nth(rnd_integer(length(L)), L).
