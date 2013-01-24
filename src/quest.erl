@@ -19,8 +19,8 @@ help_text() ->
         "* quest:get_challenge(Username, QuestID) -- requests a challenge.\n"++
         "    Returns {ChallengeID, Points, Description, Input}.\n"++
         "* quest:answer_challenge(ChallengeID, Answer) -- answers a challenge.\n"++
-        "    Returns {achievement_unlocked, NewScore}\n"++
-        "    or      {correct_but_already_achieved, CurrentScore}\n"++
+        "    Returns {achievement_unlocked, [...]}\n"++
+        "    or      {correct_but_nothing_unlocked, [...]}\n"++
         "    or      wrong_answer\n"++
         "    or      unknown_challenge_id.\n"++
         "\n"++
@@ -48,13 +48,19 @@ list(Username) when is_atom(Username) ->
 score(Username) when is_atom(Username) ->
     gen_server:call(?SERVER, {score, Username}).
 
-get_challenge(Username, QuestID) when is_atom(Username) -> 'TODO'.
-answer_challenge(ChallengeID, Answer) -> 'TODO'.
+get_challenge(Username, QuestID) when is_atom(Username), is_atom(QuestID) ->
+    gen_server:call(?SERVER, {get_challenge, Username, QuestID}).
+
+answer_challenge(ChallengeID, Answer) ->
+    gen_server:call(?SERVER, {answer_challenge, ChallengeID, Answer}).
 
 submit(Username, QuestID, SolutionFun) when is_atom(Username),
                                             is_atom(QuestID),
                                             is_function(SolutionFun,1) ->
-    {ChallengeID,_,_,Input}=quest:get_challenge(Username, QuestID),
-    quest:answer_challenge(ChallengeID, SolutionFun(Input)).
+    case quest:get_challenge(Username, QuestID) of
+        {error,_}=Error -> Error;
+        {ChallengeID,_,_,Input} ->
+            quest:answer_challenge(ChallengeID, SolutionFun(Input))
+    end.
 
 
