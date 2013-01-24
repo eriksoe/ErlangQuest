@@ -22,16 +22,16 @@ quest_list() ->
      {tuple_rotate,      20, 5, "Given a tuple of an unknown arity, rotate the elements one place to the left."},
      {primality_check,   20, 7, "Given a list of integers, answer with a list of booleans indicating whether the corresponding number is a prime."},
      {boolean_evaluator, 30, 15,
-      "Given a boolean expression of the grammar:\n"++
-          "expr ::= a | b | c       % Variables\n"++
-          "       | true | false    % Constants\n"++
-          "       | {not, <expr>} | {or, <expr>, <expr>} | {and, <expr>, <expr>}\n"++
-          "construct the truth table for the expression, containing the value\n"++
-          "of the expression for each of the 8 truth assignments to a, b and c.\n"++
-          "Examples:\n"++
-          "  a         -> [false,true,false,true,false,true,false,true]\n"++
-          "  {not,c}   -> [true,true,true,true,false,false,false,false]\n"++
-          "  {and,a,b} -> [false,false,false,true,false,false,false,true].\n"}
+      ["Given a boolean expression of the grammar:",
+       "expr ::= a | b | c       % Variables",
+       "       | true | false    % Constants",
+       "       | {not, <expr>} | {or, <expr>, <expr>} | {and, <expr>, <expr>}",
+       "construct the truth table for the expression, containing the value",
+       "of the expression for each of the 8 truth assignments to a, b and c.",
+       "Examples:",
+       "  a         -> [false,true,false,true,false,true,false,true]",
+       "  {not,c}   -> [true,true,true,true,false,false,false,false]",
+       "  {and,a,b} -> [false,false,false,true,false,false,false,true]."]}
      ].
 
 any_answer() ->
@@ -65,14 +65,58 @@ sum_of_numbers() ->
     #quest{generate=fun()->[rnd_integer() || _ <- lists:seq(1,5+rnd_integer(15))] end,
            verify=fun(Input,Answer) -> Answer==lists:sum(Input) end}.
 
+boolean_evaluator() ->
+    #quest{generate=fun() -> rnd_bool_exp(3+rnd_integer(10)) end,
+           verify=fun(Exp,Answer) -> verify_boolean_evaluations(Exp,Answer) end}.
+verify_boolean_evaluations(Exp, Answer) ->
+    TF = [true,false],
+    Inputs = [{A,B,C} || A <- TF,
+                         B <- TF,
+                         C <- TF],
+    (catch length(Answer))==8
+        andalso lists:all(fun erlang:is_boolean/1, Answer)
+        andalso lists:all(fun ({I,O})->verify_boolean_evaluation(Exp,I,O) end,
+                          lists:zip(Inputs, Answer)).
+verify_boolean_evaluation(C, _, V) when is_boolean(C) -> C=:=V;
+verify_boolean_evaluation(a, {A,_,_}, V) -> V =:= A;
+verify_boolean_evaluation(b, {_,B,_}, V) -> V =:= B;
+verify_boolean_evaluation(c, {_,_,C}, V) -> V =:= C;
+verify_boolean_evaluation({'not', E}, In, Out) ->
+    verify_boolean_evaluation(E, In, not Out);
+verify_boolean_evaluation({'or', E1, E2}, In, true) ->
+    verify_boolean_evaluation(E1, In, true) orelse verify_boolean_evaluation(E2, In, true);
+verify_boolean_evaluation({'or', E1, E2}, In, false) ->
+    verify_boolean_evaluation(E1, In, false) andalso verify_boolean_evaluation(E2, In, false);
+verify_boolean_evaluation({'and', E1, E2}, In, true) ->
+    verify_boolean_evaluation(E1, In, true) andalso verify_boolean_evaluation(E2, In, true);
+verify_boolean_evaluation({'and', E1, E2}, In, false) ->
+    verify_boolean_evaluation(E1, In, false) orelse verify_boolean_evaluation(E2, In, false).
+
+
 %%%==================== Common generators ==============================
 
 rnd_integer() ->
     crypto:rand_uniform(-100,100).
 
 rnd_integer(N) ->
-    crypto:rand_uniform(1,N).
+    crypto:rand_uniform(1,N+1).
 
 semi_bignum() ->
     <<ID:64>> = crypto:rand_bytes(8),
     ID.
+
+rnd_of(L) ->
+    lists:nth(rnd_integer(length(L)), L).
+
+rnd_bool_exp(0) ->
+    rnd_of([false, true, a, b, c]);
+rnd_bool_exp(Sz) when Sz > 0 ->
+    case rnd_of(['not', 'and', 'or']) of
+        'not' -> {'not', rnd_bool_exp(Sz-1)};
+        BinOp ->
+            LeftSz = rnd_integer(Sz)-1,
+            RightSz = Sz-1-LeftSz,
+            {BinOp, rnd_bool_exp(LeftSz), rnd_bool_exp(RightSz)}
+    end.
+
+
