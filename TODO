@@ -1,11 +1,38 @@
 ==== TO DO
-- Basic quest_server.
-- Scoreboard
-- Active challenge expiry
+- Quests:
+  Implementation:
+  - even_count
+  - tuple_swap
+  - primality_check
+  Description:
+  - Quests involving spawning a process.
+  - receive_message
+  - send_message
+  - ping_from_new_process
+  - sum_of_digits	// "1749" -> 21
+  - rot13		// "ABZ"  -> "NOM"
+  - last_value_wins
+  - min_and_max
+  - min_and_max_server
+  - leftmost_and_rightmost
+  - tree_paths          // {{a,b},{a,c}} -> [{a,[[l,l],[r,l]]}, {b,[[l,r]]}, {c,[[r,r]]}]
+  - tree_builder
+  - tree_builder_server
+  - simple_add_calculator	// ["1+2", "9+  7"] -> [3,16]
+  - add_calculator      // ["1+2+3", "9  +10+1+0"] -> [6,20]
+  - simple_calculator	// ["1 + 2", "3*  4"] -> [3,12]
+  - postfix_calculator	// "1 4 3 - +" -> 2
+  - lisp_calculator	// "(+ 1 ( - 4 3))" -> 2
+  - word_count          // "This is a sentence, is it not?" -> [{"this",1},{"is",2}, {not,1}, ...]
+
+
+- Expiry of active challenges
 ...
 - Hint system?
-- web scoreboard
+- Web scoreboard
 
 ==== DONE
 - Quest interface.
 - First quest
+- Basic quest_server.
+- Scoreboard

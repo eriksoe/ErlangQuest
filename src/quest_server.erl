@@ -185,12 +185,16 @@ make_challenge(Quest, Username, #state{active_challenges = ACTab}) ->
     ChallengeID = gen_challenge_id(),
     {QuestID, _LevelRequired, PointsWorth, Description} = Quest,
     #quest{generate=GenFun} = quest_functions(QuestID),
-    Input = GenFun(),                           % TODO: Error handling.
+    ChallengeSpec = GenFun(),
     ets:insert(ACTab, #active_challenge{id=ChallengeID,
                                         user=Username,
                                         quest=QuestID,
-                                        input = Input,
+                                        input = ChallengeSpec,
                                         issued=now()}),
+    Input = case ChallengeSpec of
+                {'$remember', _, I} -> I;
+                I -> I
+            end,
     {ChallengeID, PointsWorth, Description, Input}.
 
 %%%===================================================================
@@ -213,7 +217,7 @@ quest_list() ->
 
 get_user_score(Username, #state{user_scores=UserTab}) ->
     case ets:lookup(UserTab, Username) of
-        [] -> 1000;
+        [] -> 0;
         [#user_score{score=Score}] -> Score
     end.
 

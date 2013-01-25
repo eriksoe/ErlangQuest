@@ -128,6 +128,28 @@ verify_boolean_evaluation({'and', E1, E2}, In, false) ->
     verify_boolean_evaluation(E1, In, false) orelse verify_boolean_evaluation(E2, In, false).
 %%%----------
 
+closest_fraction1() ->
+    #quest{generate=fun() -> gen_closest_fraction_problem(10, 100) end,
+           verify=fun({'$remember', Expected, _},Answer) -> Answer=:=Expected end}.
+closest_fraction2() ->
+    #quest{generate=fun() -> gen_closest_fraction_problem(1000000, 10000000) end,
+           verify=fun({'$remember', Expected, _},Answer) -> Answer=:=Expected end}.
+
+gen_closest_fraction_problem(MinN, MaxN) ->
+    N = rnd_integer(MinN, MaxN),
+    {A0,B0} = {rnd_integer(N),rnd_integer(N)},
+    {A1,B1} = {min(A0,B0), max(A0,B0)}, % Keep in [0;1]
+    GCD = gcd(A1,B1),
+    {A,B} = {A1 div GCD, B1 div GCD}, % Reduce
+    Perturbance = (rnd_float()*0.99 - 0.5) / (N*N),
+    Input = {A/B + Perturbance, N},
+    {'$remember', {A,B}, Input}.
+
+%%%==================== Common math ==============================
+gcd(A,B) when B>A -> gcd(B,A);  % Keep A largest.
+gcd(A,B) when B<0 -> gcd(A,-B); % Keep B non-negative.
+gcd(A,0) -> A;
+gcd(A,B) -> gcd(B, A rem B).    % case A>B>0.
 
 %%%==================== Common generators ==============================
 
@@ -136,6 +158,12 @@ rnd_integer() ->
 
 rnd_integer(N) ->
     crypto:rand_uniform(1,N+1).
+
+rnd_integer(Min,Max) -> % Inclusive.
+    crypto:rand_uniform(Min, Max+1).
+
+rnd_float() ->
+    random:uniform().
 
 semi_bignum() ->
     <<ID:64>> = crypto:rand_bytes(8),

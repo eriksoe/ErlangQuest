@@ -1,0 +1,57 @@
+Quests by category and difficulty
+---------------------------------
+
+Quest names in parentheses are planned.
+
+Introduction:
+- any_answer
+- answer_the_input
+
+Type basics:
+- any_pid
+- any_reference
+- list_of_length_10
+- impure_list
+- tuple_swap
+- which_type
+
+List handling:
+- sum_of_numbers
+- (rot13)
+- (sum_of_digits)
+- (even_count)
+- (last_value_wins)
+- (min_and_max)
+
+Tree handling:
+- (leftmost_and_rightmost)
+- (tree_paths)
+- (tree_builder)
+- (tree_builder_server)
+
+Conversions:
+- base_7
+- tuple_rotate
+
+String parsing:
+- (word_count)
+- (simple_add_calculator)
+- (add_calculator)
+- (simple_calculator)
+- (postfix_calculator)
+- (lisp_calculator)
+
+
+Processes:
+- (receive_message)
+- (send_message)
+- (ping_from_new_process)
+
+
+Numerical problems:
+- (primality_check)
+- closest_fraction1
+- closest_fraction2
+
+Interpretation:
+- boolean_evaluator
