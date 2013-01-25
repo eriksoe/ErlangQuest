@@ -28,6 +28,17 @@ participant can then progress in their own pace.
 In either case, a Quest server is started, the player(s) connect to it,
 pick a user name, and the game can begin.
 
+The short version is:
+
+    Server:
+      MY_IP=... make start-server
+    Player:
+      MY_IP=... SERVER_IP=... make start-client
+      quest:help().
+
+See below for the longer version.
+
+
 How to set up the server
 ------------------------
 
