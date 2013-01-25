@@ -77,11 +77,20 @@ answer_the_input() ->
 
 sum_of_numbers() ->
     #quest{generate=fun()->[rnd_integer() || _ <- lists:seq(1,5+rnd_integer(15))] end,
-           verify=fun(Input,Answer) -> Answer==lists:sum(Input) end}.
+           verify=fun(Input,Answer) -> Answer=:=lists:sum(Input) end}.
+
+even_count() ->
+    #quest{generate=fun()->[rnd_integer() || _ <- lists:seq(1,10+rnd_integer(30))] end,
+           verify=fun(L,Answer) -> Answer=:=length([X||X<-L, X rem 2==0]) end}.
+
+tuple_swap() ->
+    #quest{generate=fun()->{char_atom(), rnd_integer(100)} end,
+           verify=fun({A,B},Answer) -> Answer=:={B,A} end}.
+
 
 base_7() ->
     #quest{generate=fun()->rnd_integer(10000) end,
-           verify=fun(Input,Answer) -> Answer==integer_to_list(Input,7) end}.
+           verify=fun(Input,Answer) -> Answer=:=integer_to_list(Input,7) end}.
 
 tuple_rotate() ->
     #quest{generate=fun()-> L = [char_atom() || _ <- lists:seq(1,5+rnd_integer(20))],
