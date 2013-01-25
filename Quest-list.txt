@@ -13,13 +13,13 @@ Type basics:
 - list_of_length_10
 - impure_list
 - tuple_swap
-- which_type
+- (which_type)
 
 List handling:
 - sum_of_numbers
 - (rot13)
 - (sum_of_digits)
-- (even_count)
+- even_count
 - (last_value_wins)
 - (min_and_max)
 
