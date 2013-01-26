@@ -13,7 +13,8 @@ Type basics:
 - list_of_length_10
 - impure_list
 - tuple_swap
-- (which_type)
+- which_type
+- which_type2
 
 List handling:
 - sum_of_numbers
