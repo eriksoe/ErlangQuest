@@ -15,6 +15,32 @@ quest_list() ->
      {answer_the_input,   1, 1, "Answer with the input given in the challenge."},
      {list_of_length_10,  2, 1, "Answer with any list of length 10."},
      {impure_list,        4, 2, "Answer with any impure list."},
+     {which_type,         8, 5, ["Given a list of values, answer with a list",
+                                 "stating the type of the corresponding value as follows:",
+                                 "  'number' if it is a number",
+                                 "  'atom' if it is an atom",
+                                 "  'list' if it is a list",
+                                 "  'tuple' if it is a tuple",
+                                 "  'binary' if it is a binary",
+                                 "  'pid' if it is a process ID",
+                                 "  'reference' if it is a reference",
+                                 "  'closure' if it is a function object"]},
+     {which_type2,       15,10, ["Given a list of values, answer with a list",
+                                 "stating the type of the corresponding value as follows:",
+                                 "  'natural_number' if it is a positive integer",
+                                 "  'integer' if it is any other integer",
+                                 "  'float' if it is a floating-point number",
+                                 "  'boolean' if it is 'true' or 'false'",
+                                 "  'atom' if it is any other atom",
+                                 "  'nil' if it is the empty list",
+                                 "  'string' if it is a non-empty list containing only numbers in [0;255]",
+                                 "  'impure_list' if it is an impure",
+                                 "  '{list,Length}' if it is any other list and has length Length",
+                                 "  '{tuple, Size}' if it is a tuple of size Size",
+                                 "  '{binary,Size}' if it is a binary and contains Size bytes",
+                                 "  'pid' if it is a process ID",
+                                 "  'reference' if it is a reference",
+                                 "  '{closure, Arity}' if it is a function object of arity Arity"]},
      {sum_of_numbers,     8, 3, "Given a list of numbers, answer with their sum."},
      {even_count,         8, 3, "Given a list of integers, answer how many of them are even."},
      {tuple_swap,         8, 2, "Given a pair (2-tuple), answer with a pair with the same elements, but swapped."},
@@ -52,6 +78,10 @@ any_answer() ->
     #quest{generate=fun()->dummy end,
            verify=fun(_,_)->true end}.
 
+answer_the_input() ->
+    #quest{generate=fun()->semi_bignum() end,
+           verify=fun(Input,Answer) -> Answer=:=Input end}.
+
 any_pid() ->
     #quest{generate=fun()->dummy end,
            verify=fun(_,Answer) -> is_pid(Answer) end}.
@@ -66,14 +96,56 @@ list_of_length_10() ->
 
 impure_list() ->
     #quest{generate=fun()->dummy end,
-           verify=fun(_,Answer) -> is_impure_list(Answer,0) end}.
-is_impure_list([],_) -> false;
-is_impure_list([_|T],N) -> is_impure_list(T,N+1);
-is_impure_list(_,N) -> N>0.
+           verify=fun(_,Answer) -> is_impure_list(Answer) end}.
 
-answer_the_input() ->
-    #quest{generate=fun()->semi_bignum() end,
-           verify=fun(Input,Answer) -> Answer=:=Input end}.
+
+%%%----------
+which_type() ->
+    #quest{generate=fun()-> [rnd_any_type() || _ <- lists:seq(1,20)] end,
+           verify=fun(Input,Answer) ->
+                          allzipwith(fun correct_type1/2, Input, Answer)
+                  end}.
+which_type2() ->
+    #quest{generate=fun()-> [rnd_any_type() || _ <- lists:seq(1,20)] end,
+           verify=fun(Input,Answer) ->
+                          allzipwith(fun correct_type2/2, Input, Answer)
+                  end}.
+
+correct_type1(X,number) when is_number(X) -> true;
+correct_type1(X,atom)   when is_atom(X)   -> true;
+correct_type1(X,list)   when is_list(X)   -> true;
+correct_type1(X,tuple)  when is_tuple(X)  -> true;
+correct_type1(X,binary) when is_binary(X) -> true;
+correct_type1(X,pid)    when is_pid(X)    -> true;
+correct_type1(X,reference) when is_reference(X) -> true;
+correct_type1(X,closure) when is_function(X) -> true;
+correct_type1(_,_) -> false.
+
+correct_type2(X,T) when is_integer(X), X>0 -> T == natural_number;
+correct_type2(X,T) when is_integer(X)      -> T == integer;
+correct_type2(X,T) when is_float(X)        -> T==float;
+correct_type2(X,T) when is_boolean(X)      -> T==boolean;
+correct_type2(X,T) when is_atom(X)         -> T==atom;
+correct_type2(X,T) when X==[]              -> T==nil;
+correct_type2(X,T) when is_list(X) ->
+    case is_latin1_string(X) of
+        true -> T==string;
+        false ->
+            case is_impure_list(X) of
+                true -> T==impure_list;
+                false -> T=={list, length(X)}
+            end
+    end;
+correct_type2(X,T) when is_tuple(X)        -> T=={tuple, tuple_size(X)};
+correct_type2(X,T) when is_binary(X)       -> T=={binary, byte_size(X)};
+correct_type2(X,T) when is_pid(X)          -> T==pid;
+correct_type2(X,T) when is_reference(X)    -> T==reference;
+correct_type2(X,T) when is_function(X)     ->
+    {arity,N} = erlang:fun_info(X, arity),
+    T=={closure, N};
+correct_type2(_,_) -> false.
+%%%----------
+
 
 sum_of_numbers() ->
     #quest{generate=fun()->[rnd_integer() || _ <- lists:seq(1,5+rnd_integer(15))] end,
@@ -154,11 +226,32 @@ gen_closest_fraction_problem(MinN, MaxN) ->
     Input = {A/B + Perturbance, N},
     {'$remember', {A,B}, Input}.
 
+%%%==================== Common list functions ==============================
+allzipwith(Fun, L1, L2) when is_function(Fun,2), is_list(L1), is_list(L2) ->
+    lists:all(fun({A,B}) -> Fun(A,B) end,
+              lists:zip(L1,L2)).
+
 %%%==================== Common math ==============================
 gcd(A,B) when B>A -> gcd(B,A);  % Keep A largest.
 gcd(A,B) when B<0 -> gcd(A,-B); % Keep B non-negative.
 gcd(A,0) -> A;
 gcd(A,B) -> gcd(B, A rem B).    % case A>B>0.
+
+%%%==================== Common predicates ==============================
+
+is_impure_list(L) -> is_impure_list(L, 0).
+
+is_impure_list([],_) -> false;
+is_impure_list([_|T],N) -> is_impure_list(T,N+1);
+is_impure_list(_,N) -> N>0.
+
+is_latin1_string([]) -> true;
+is_latin1_string([H|T]) ->
+    is_integer(H) andalso
+        H>=0 andalso
+        H=<16#FF andalso
+        is_latin1_string(T);
+is_latin1_string(_) -> false.
 
 %%%==================== Common generators ==============================
 
@@ -177,6 +270,45 @@ rnd_float() ->
 semi_bignum() ->
     <<ID:64>> = crypto:rand_bytes(8),
     ID.
+
+rnd_any_type() ->
+    Gen = rnd_of([fun rnd_integer/0,
+                  fun rnd_float/0,
+                  fun rnd_atom/0,
+                  fun rnd_binary/0,
+                  fun erlang:self/0,
+                  fun erlang:make_ref/0,
+                  fun () -> [rnd_integer(0,255) || _ <- lists:seq(1,rnd_integer(0,10))] end,
+                  fun () -> [rnd_primitive_type() || _ <- lists:seq(1,rnd_integer(0,10))] end,
+                  fun () -> [rnd_primitive_type() || _ <- lists:seq(1,rnd_integer(0,10))] ++ rnd_primitive_type() end, % Impure list
+                  fun () -> list_to_tuple([rnd_atom() || _ <- lists:seq(1,rnd_integer(0,10))]) end,
+                  fun () -> rnd_of([fun()->throw(function_not_supposed_to_be_called) end,
+                                    fun(_)->throw(function_not_supposed_to_be_called) end,
+                                    fun(_,_)->throw(function_not_supposed_to_be_called) end,
+                                    fun(_,_,_)->throw(function_not_supposed_to_be_called) end])
+                  end
+                 ]),
+    Gen().
+
+rnd_primitive_type() ->
+    Gen = rnd_of([fun rnd_integer/0,
+                  fun rnd_float/0,
+                  fun rnd_atom/0,
+                  fun rnd_binary/0,
+                  fun erlang:self/0,
+                  fun erlang:make_ref/0]),
+    Gen().
+
+
+rnd_atom() ->
+    case rnd_integer(10) of
+        0 -> false;
+        1 -> true;
+        _ -> char_atom()
+    end.
+
+rnd_binary() ->
+    crypto:rand_bytes(rnd_integer(0,20)).
 
 char_atom() ->
     list_to_atom([$a + rnd_integer(26)-1]).
