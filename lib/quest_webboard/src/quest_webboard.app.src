@@ -1,0 +1,14 @@
+{application, quest_webboard,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  sasl,
+                  socketio
+                 ]},
+  {mod, { quest_webboard_app, []}},
+  {env, []}
+ ]}.

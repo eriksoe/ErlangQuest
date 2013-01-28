@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1"/>
+  <meta HTTP-equiv="X-UA-Compatible" content="IE=EDGE"/>
+
+  <title>Erlang Quest scoreboard</title>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/quest_webboard.js"></script>
+
+  <style>
+    BODY {
+      margin: 0px; padding: 0px; background:#000099;
+    }
+    .wrapper {}
+    .header {color: #00AAAA; text-align: center; margin-bottom: 0.5em;}
+    H1 {
+      margin: 0em;
+      font-size: 400%; font-weight: bold;
+    }
+    .footer {line-height: 1em; margin: 0px; padding: 0px; color: #00AAAA;}
+
+    .contentpane {
+      float:left;
+      margin-left: 2%;
+      padding: 0em 0.25em;
+      /*min-height: 20em;*/
+      background: #7799FF; color: black; border: solid thin #99BBFF;
+    }
+    .contentpane H2 {
+      margin:0em;
+      color: white;
+      font-size: 150%; font-weight: bold;
+      text-align: center;
+    }
+    .centerpane { width: 60%; }
+    .rightpane  { width: 30%; }
+
+    .table_wrapper { overflow: auto; min-height: 20em; }
+
+    .player_table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    .player_table TD, .player_table TH {
+      border-bottom: solid thin #99BBFF;
+      padding: 0.1em 1em;
+    }
+    .player_table TH { vertical-align: bottom; }
+
+    .player_table .score_col {width: 5em; text-align:right;}
+    .player_table .name_col {width: 20em; text-align:left;}
+    .player_table .filler_col {width: 100%;}
+    .player_table TH.questname {
+      font-family: courier; font-weight: normal; text-align:center;
+      line-height: 0.9;
+      margin: 0em; padding: 0 0.35em;
+    }
+    .player_table TD.questname {
+      margin: 0; padding: 0;
+    }
+
+    </style>
+</head>
+<body onLoad="init()">
+  <div class="header">
+    <h1>Erlang Quest</h1>
+  </div>
+  <div class="wrapper">
+    <div class="contentpane centerpane">
+      <h2>Players and achievements</h2>
+      <div class="table_wrapper">
+      <table class="player_table">
+        <colgroup>
+          <col span="1" class="score_col" style="color:red" align="right" width="5em">
+          <col span="1" class="name_col" align="left">
+<!--           <col span="*" class="quest_col"> -->
+        </colgroup>
+        <tr><th>Score</th><th>Name</th>
+          <th class="questname">a<br>n<br>y<br>|<br>v<br>a<br>l<br>u<br>e</th>
+          <th class="questname">a<br>n<br>y<br>|<br>r<br>e<br>f<br>e<br>r<br>e<br>n<br>c<br>e</th>
+          <th class="filler_col"/>
+        <tr><td class="score_col">100</td><td class="name_col">Player1</td><td class="questname"/><td class="questname"/><td/>
+      </table>
+      </div>
+    </div>
+    <div class="contentpane rightpane">
+      <h2>Highscore</h2>
+      Test! dfslæf klæds føkdlæf sd
+      <div style="height:25em">fekædsl</div>
+    </div>
+  </div>
+  <div style="clear:both; width: 100%; bottom: -0px; text-align: center; font-size: 75%; color: #00AAAA">
+    Footer!
+  </div>
+</body>
+</html>
