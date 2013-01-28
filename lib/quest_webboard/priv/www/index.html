@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
 "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html>
@@ -22,19 +23,30 @@
     }
     .footer {line-height: 1em; margin: 0px; padding: 0px; color: #00AAAA;}
 
-    .contentpane {
+    .column {
       float:left;
       margin-left: 2%;
       padding: 0em 0.25em;
+    }
+    .contentpane {
       /*min-height: 20em;*/
-      background: #7799FF; color: black; border: solid thin #99BBFF;
+      background: #7799FF; color: black; border: 2px outset #99BBFF;
+      font-family: helvetica, arial, serif;
     }
     .contentpane H2 {
       margin:0em;
       color: white;
+      font-family:Cambria,'Times New Roman','Nimbus Roman No9 L','Freeserif',Times,serif;
       font-size: 150%; font-weight: bold;
       text-align: center;
     }
+    .contentpane .ruler {
+      position: relative;
+      width: 90%;  left: 5%;
+      height: 0px;
+      border-bottom-style: ridge; border-color: #6688FF; border-width: 2px;
+    }
+
     .centerpane { width: 60%; }
     .rightpane  { width: 30%; }
 
@@ -70,27 +82,38 @@
     <h1>Erlang Quest</h1>
   </div>
   <div class="wrapper">
-    <div class="contentpane centerpane">
+    <div class="column contentpane centerpane">
       <h2>Players and achievements</h2>
+      <div class="ruler"></div>
       <div class="table_wrapper">
       <table class="player_table">
         <colgroup>
-          <col span="1" class="score_col" style="color:red" align="right" width="5em">
-          <col span="1" class="name_col" align="left">
+          <col span="1" class="score_col" style="color:red" align="right" width="5em"/>
+          <col span="1" class="name_col" align="left"/>
 <!--           <col span="*" class="quest_col"> -->
         </colgroup>
-        <tr><th>Score</th><th>Name</th>
-          <th class="questname">a<br>n<br>y<br>|<br>v<br>a<br>l<br>u<br>e</th>
-          <th class="questname">a<br>n<br>y<br>|<br>r<br>e<br>f<br>e<br>r<br>e<br>n<br>c<br>e</th>
+        <tr>
+          <th>Score</th><th>Name</th>
+          <th class="questname">a<br/>n<br/>y<br/>|<br/>v<br/>a<br/>l<br/>u<br/>e</th>
+          <th class="questname">a<br/>n<br/>y<br/>|<br/>r<br/>e<br/>f<br/>e<br/>r<br/>e<br/>n<br/>c<br/>e</th>
           <th class="filler_col"/>
-        <tr><td class="score_col">100</td><td class="name_col">Player1</td><td class="questname"/><td class="questname"/><td/>
+        </tr><tr>
+          <td class="score_col">100</td><td class="name_col">Player1</td><td class="questname"/><td class="questname"/><td/>
+        </tr>
       </table>
       </div>
     </div>
-    <div class="contentpane rightpane">
-      <h2>Highscore</h2>
-      Test! dfslæf klæds føkdlæf sd
-      <div style="height:25em">fekædsl</div>
+    <div class="column rightpane">
+      <div class="contentpane">
+        <h2>Highscore</h2>
+        <div class="ruler"></div>
+        <div style="min-height:12em">Lorem</div>
+      </div>
+      <div class="contentpane" style="margin-top: 1em">
+        <h2>Recent events</h2>
+        <div class="ruler"></div>
+        <div style="min-height:18em">Ipsum</div>
+      </div>
     </div>
   </div>
   <div style="clear:both; width: 100%; bottom: -0px; text-align: center; font-size: 75%; color: #00AAAA">
