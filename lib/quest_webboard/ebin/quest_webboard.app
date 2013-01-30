@@ -1,9 +1,0 @@
-{application,quest_webboard,
-             [{description,[]},
-              {vsn,"1"},
-              {registered,[]},
-              {applications,[kernel,stdlib,sasl,socketio]},
-              {mod,{quest_webboard_app,[]}},
-              {env,[]},
-              {modules,[quest_webboard,quest_webboard_app,
-                        quest_webboard_socketio,quest_webboard_sup]}]}.
