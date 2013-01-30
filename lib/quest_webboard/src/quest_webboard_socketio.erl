@@ -26,6 +26,8 @@ start_link() ->
     io:format("DB| quest_webboard_socketio:start_link()\n"),
     {ok, Pid} = socketio_listener:start([{http_port, 8000},
                                          {default_http_handler,?MODULE}]),
+    {ok, Pid} = socketio_listener:start([{http_port, 8000},
+                                         {default_http_handler,?MODULE}]),
 
     EventMgr = socketio_listener:event_manager(Pid),
     ok = gen_event:add_handler(EventMgr, ?MODULE,[]),
@@ -73,15 +75,19 @@ init([]) ->
 %%--------------------------------------------------------------------
 handle_event({client,Pid}, State) ->
     io:format("DB| connected: ~p\n", [Pid]),
+    EventMgr = socketio_client:event_manager(Pid),
+    ok = gen_event:add_handler(EventMgr, ?MODULE,[]),
+    socketio_client:send(Pid, #msg{ content = "Hello from server!" }),
     {ok, State};
 handle_event({disconnect,Pid}, State) ->
     io:format("DB| disconnected: ~p\n", [Pid]),
     {ok, State};
 handle_event({message, Client, Msg=#msg{}}, State) ->
-    io:format("DB| got message: ~p\n", [Msg]),
+    error_logger:info_msg("DB| got message: ~p\n", [Msg]),
+    handle_sio_message(Client, Msg),
     {ok, State};
 handle_event(OtherEvent, State) ->
-    error_logger:error_msg("~s got unexpected message: ~p\n", [?MODULE, OtherEvent]),
+    error_logger:error_msg("~s got unexpected event: ~p\n", [?MODULE, OtherEvent]),
     {ok, State}.
 
 %%--------------------------------------------------------------------
@@ -98,8 +104,8 @@ handle_event(OtherEvent, State) ->
 %% @end
 %%--------------------------------------------------------------------
 handle_call(_Request, State) ->
-    Reply = ok,
-    {ok, Reply, State}.
+    error_logger:error_msg("~s got unexpected call: ~p\n", [?MODULE, _Request]),
+    {noreply, State}.
 
 %%--------------------------------------------------------------------
 %% @private
@@ -115,6 +121,7 @@ handle_call(_Request, State) ->
 %% @end
 %%--------------------------------------------------------------------
 handle_info(_Info, State) ->
+    error_logger:error_msg("~s got unexpected message: ~p\n", [?MODULE, _Info]),
     {ok, State}.
 
 %%--------------------------------------------------------------------
@@ -151,6 +158,16 @@ handle_request(Method, Path, Req) ->
                              [Method, Path]),
     Req:respond(404).
 
+handle_sio_message(Client, Msg) ->
+    io:format("DB| handle_sio_message: ~p\n", [Msg]),
+    case Msg#msg.content of
+        [{<<"type">>, <<"replay">>},
+         {<<"from">>, TS}] ->
+            replay_quest_log_from(TS, Client);
+        MsgContent ->
+            error_logger:warning_msg("Unexpected message: ~p\n", [MsgContent])
+    end.
+
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
@@ -159,3 +176,35 @@ www_filepath(Filename) ->
     PrivDir = code:priv_dir(quest_webboard),
     WwwDir  = filename:join(PrivDir, "www"),
     filename:join(WwwDir, Filename).
+
+replay_quest_log_from(TS, Client) ->
+    {ok, Ref} = quest_log:async_playback_from(TS),
+    replay_quest_log_loop(Ref, Client).
+
+replay_quest_log_loop(Ref, Client) ->
+    receive
+        {Ref, Msg} ->
+            io:format("DB| replay_quest_log_loop: ~p\n", [Msg]),
+            case Msg of
+                eof -> ok; % Done.
+                {error, Reason} ->
+                    error({unable_to_replay, Reason});
+                {log_item, {TS,Item}} ->
+                    replay_item(Client, TS, Item),
+                    replay_quest_log_loop(Ref, Client)
+            end
+    after 15000 ->
+            error({timeout_while_replaying})
+    end.
+
+replay_item(Client, TS, {achieved, Username, QuestID, Achieved}) ->
+    Points = lists:sum([P || {_,P} <- Achieved]),
+    Variants = [a2b(V) || {V,_} <- Achieved],
+    socketio_client:send(Client, #msg{json=true,
+                                      content=[{<<"type">>, <<"achieved">>},
+                                               {<<"user">>, a2b(Username)},
+                                               {<<"quest">>, a2b(QuestID)},
+                                               {<<"points">>, Points},
+                                               {<<"variants">>, Variants}]}).
+
+a2b(Atom) -> atom_to_binary(Atom, utf8).

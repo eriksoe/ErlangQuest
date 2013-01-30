@@ -7,7 +7,8 @@
                   kernel,
                   stdlib,
                   sasl,
-                  socketio
+                  socketio,
+                  quest
                  ]},
   {mod, { quest_webboard_app, []}},
   {env, []}
