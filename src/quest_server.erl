@@ -56,6 +56,7 @@ start_link() ->
 %%%===================================================================
 
 init([]) ->
+    self() ! '$init_from_log',
     {ok, #state{
        active_challenges = ets:new(active_challenges, [{keypos, #active_challenge.id}]),
        user_scores = ets:new(user_scores, [{keypos, #user_score.username}]),
@@ -95,6 +96,12 @@ handle_cast(Msg, State) ->
     error_logger:warning_msg("~s: unexpected cast: ~p\n", [?MODULE, Msg]),
     {noreply, State}.
 
+handle_info('$init_from_log', State) ->
+    error_logger:info_msg("~s: Restoring state from log...\n", [?MODULE]),
+    {ok, NEvents} = init_from_log(State),
+    error_logger:info_msg("~s: State restored from log (~b events).\n",
+                          [?MODULE, NEvents]),
+    {noreply, State};
 handle_info(Msg, State) ->
     error_logger:warning_msg("~s: unexpected message: ~p\n", [?MODULE, Msg]),
     {noreply, State}.
@@ -179,7 +186,8 @@ add_achievements(Username, QuestID, Points, Elapsed,
                                                      points_awarded=Points})],
     AddPoints = length(Achieved) * Points,
     if AddPoints > 0 ->
-            ok = quest_log:log({achieved, Username, QuestID, Achieved, AddPoints}),
+            ok = quest_log:log({achieved, Username, QuestID,
+                                [{A,Points} || A <- Achieved]}),
             add_to_user_score(Username, AddPoints, State);
        true -> ok
     end,
@@ -230,3 +238,39 @@ add_to_user_score(Username, Amount, #state{user_scores=ScoresTab}) ->
     catch error:badarg ->
             ets:insert(ScoresTab, #user_score{username=Username, score=Amount})
     end.
+
+%%%===================================================================
+%%% Persistence
+%%%===================================================================
+
+init_from_log(State) ->
+    {ok, Ref} = quest_log:async_playback_from(0),
+    restore_loop(Ref, State, 0).
+
+restore_loop(Ref, State, N) ->
+    receive
+        {Ref, Msg} ->
+            case Msg of
+                eof -> {ok, N}; % Done.
+                {error, Reason} ->
+                    error({unable_to_restore_state, Reason});
+                {log_item, {TS,Item}} ->
+                    replay_event(TS, Item, State),
+                    restore_loop(Ref, State, N+1)
+            end
+    after 5000 ->
+            error({timeout_while_restoring_state})
+    end.
+
+replay_event(_TS, {achieved, Username, QuestID, Achieved}, State) ->
+    #state{user_achievements=AchTab} = State,
+    PointList =
+        [begin
+             ets:insert(AchTab, #user_achievement{key={Username,QuestID,V},
+                                                  points_awarded=P}),
+             P
+         end
+         || {V,P} <- Achieved],
+    AddPoints = lists:sum(PointList),
+    add_to_user_score(Username, AddPoints, State).
+
