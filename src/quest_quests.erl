@@ -71,7 +71,23 @@ quest_list() ->
        "the closest to X among all fractions with denominator =< N.",
        "If there is more than one answer, pick the one with lowest Denominator.",
        "Answer with the tuple {Enumerator,Denominator}.",
-       "Example: {0.36, 6} -> {1,3}."]}
+       "Example: {0.36, 6} -> {1,3}."]},
+     {labyrinth, 40, 15,
+      ["Given is a 2D array - a list of N lists of each M characters,",
+       "each of which are either ' ' or 'x'.",
+       "This array represents a labyrinth where ' ' represents a traversable ",
+       "cell and 'x' represents a blocked cell.",
+       "The cells are named {X,Y} where X is the (1-based) index of the ",
+       "inner list and Y is the index of the outer list.",
+       "Find a path from the top (Y=1) to the bottom (Y=N) consisting of ",
+       "traversable cells which are pairwise neighbours either horizontally ",
+       "or vertically.  Answer with the path on the type [{X,Y}], where each ",
+       "{X,Y} is the coordinate of a cell on the path.",
+       "Example: ",
+       "[\"x xx \",",
+       " \"x    \",",
+       " \"xx xx\"]   -> [{2,1}, {2,2}, {3,2}, {3,3}}]"
+      ]}
     ].
 
 any_answer() ->
@@ -207,6 +223,7 @@ verify_boolean_evaluation({'and', E1, E2}, In, true) ->
     verify_boolean_evaluation(E1, In, true) andalso verify_boolean_evaluation(E2, In, true);
 verify_boolean_evaluation({'and', E1, E2}, In, false) ->
     verify_boolean_evaluation(E1, In, false) orelse verify_boolean_evaluation(E2, In, false).
+
 %%%----------
 
 closest_fraction1() ->
@@ -225,6 +242,66 @@ gen_closest_fraction_problem(MinN, MaxN) ->
     Perturbance = (rnd_float()*0.99 - 0.5) / (N*N),
     Input = {A/B + Perturbance, N},
     {'$remember', {A,B}, Input}.
+
+%%%----------
+
+labyrinth() ->
+    #quest{generate=fun() -> make_labyrinth(40) end,
+           verify=fun verify_labyrinth_path/2}.
+
+verify_labyrinth_path(Labyrinth0, Path) ->
+    Labyrinth = list_to_tuple([list_to_tuple(L) || L <- Labyrinth0]),
+    lists:all(fun (P) -> labyrinth_cell_is_traversable(P, Labyrinth) end,
+              Path)
+        andalso
+        verify_labyrinth_path_top(Path, Labyrinth).
+
+verify_labyrinth_path_top([{_,Y} | _]=Path, Labyrinth) ->
+    Y=:=1 andalso verify_labyrinth_path_middle(Path, Labyrinth).
+verify_labyrinth_path_middle([{X1,Y1} | [{X2,Y2}|_]=Rest], Labyrinth) ->
+    (abs(X2-X1) + abs(Y2-Y1))==1
+        andalso verify_labyrinth_path_middle(Rest, Labyrinth);
+verify_labyrinth_path_middle([P], Labyrinth) ->
+    verify_labyrinth_path_bottom(P, Labyrinth).
+verify_labyrinth_path_bottom({_,Y}, Labyrinth) ->
+    Y=:=tuple_size(Labyrinth).
+
+
+labyrinth_cell_is_traversable({X,Y}, Labyrinth) ->
+    catch(element(X,element(Y,Labyrinth)))==$\s.
+
+make_labyrinth(N) ->
+    UF0 = uf_insert(top, uf_insert(bottom, uf_new())),
+    UF1 = lists:foldl(fun uf_insert/2,
+                      UF0,
+                      [{X,Y} || X <- lists:seq(1,N), Y <- lists:seq(0,N+1)]),
+    UF2 = lists:foldl(fun(X,UF) -> uf_join({X,0}, top, uf_join({X,N+1}, bottom, UF)) end,
+                      UF1,
+                      lists:seq(1,N)),
+    FreeSet = unblock_random_until_passage(N, UF2, sets:new()),
+    labyrinth_freeset_to_array(FreeSet, N, N).
+
+unblock_random_until_passage(N, UF, FreeCells) ->
+    X = rnd_integer(N),
+    Y = rnd_integer(N),
+    P = {X,Y},
+    F = fun(P2={_,Y2},U) -> uf_join_when(P,P2,U, (Y2==0 orelse Y2==N+1) orelse sets:is_element(P2, FreeCells)) end,
+    UF2 = F({X+1,Y}, F({X-1,Y}, F({X,Y+1}, F({X,Y-1}, UF)))),
+    FreeCells2 = sets:add_element(P, FreeCells),
+    case uf_same(top, bottom, UF2) of
+        true ->
+            FreeCells2;
+        false ->
+            unblock_random_until_passage(N, UF2, FreeCells2)
+    end.
+
+labyrinth_freeset_to_array(FreeSet, XMax, YMax) ->
+    [[case sets:is_element({X,Y}, FreeSet) of
+          true -> $\s;
+          false -> $x
+      end
+      || X <- lists:seq(1,XMax)]
+     || Y <- lists:seq(1,YMax)].
 
 %%%==================== Common list functions ==============================
 allzipwith(Fun, L1, L2) when is_function(Fun,2), is_list(L1), is_list(L2) ->
@@ -252,6 +329,39 @@ is_latin1_string([H|T]) ->
         H=<16#FF andalso
         is_latin1_string(T);
 is_latin1_string(_) -> false.
+
+%%%==================== Union-find data structure ====================
+uf_new() -> dict:new().
+
+uf_insert(Node,D) -> dict:store(Node, Node, D).
+
+uf_same(Node1, Node2, D) ->
+    uf_canon(Node1, D) == uf_canon(Node2, D).
+
+uf_canon(Node, D) ->
+    case dict:find(Node,D) of
+        {ok,Node} -> Node; % Found a root.
+        {ok,CloserToRoot} -> uf_canon(CloserToRoot,D);
+        error -> error({uf_canon_called_on_unknown_node, Node, dict:to_list(D)})
+    end.
+
+uf_join_when(A, B, UF, Condition) ->
+    case Condition of
+        true -> uf_join(A, B, UF);
+        false -> UF
+    end.
+
+uf_join(Node1, Node2, D) ->
+    Canon1 = uf_canon(Node1, D),
+    Canon2 = uf_canon(Node2, D),
+    {A,B} = {min(Canon1,Canon2),
+             max(Canon1,Canon2)},
+    if A=:=B -> D;
+       true ->
+            %% Let A be new root (we prefer atoms over references :-))
+            %% TODO: Performance could be better if B were chosen more intelligently.
+            dict:store(Node1, A, dict:store(Node2, A, dict:store(B, A, D)))
+    end.
 
 %%%==================== Common generators ==============================
 
