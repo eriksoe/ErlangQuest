@@ -24,5 +24,9 @@ start_link() ->
 %% ===================================================================
 
 init([]) ->
-    {ok, { {one_for_one, 5, 10}, [?CHILD(quest_server,worker)]} }.
+    {ok, { {one_for_all, 5, 10},
+           [
+            ?CHILD(quest_log,worker),
+            ?CHILD(quest_server,worker)
+           ]} }.
 

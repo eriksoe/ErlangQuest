@@ -178,7 +178,11 @@ add_achievements(Username, QuestID, Points, Elapsed,
             ets:insert_new(AchTab, #user_achievement{key={Username,QuestID,Variant},
                                                      points_awarded=Points})],
     AddPoints = length(Achieved) * Points,
-    (AddPoints==0) orelse add_to_user_score(Username, AddPoints, State),
+    if AddPoints > 0 ->
+            ok = quest_log:log({achieved, Username, QuestID, Achieved, AddPoints}),
+            add_to_user_score(Username, AddPoints, State);
+       true -> ok
+    end,
     Achieved.
 
 make_challenge(Quest, Username, #state{active_challenges = ACTab}) ->
