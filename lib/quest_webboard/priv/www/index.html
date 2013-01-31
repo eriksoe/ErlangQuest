@@ -62,7 +62,8 @@
       border-bottom: solid thin #99BBFF;
       padding: 0.1em 1em;
     }
-    .player_table TH { vertical-align: bottom; }
+    .player_table TH { vertical-align: bottom; min-height: 8em;}
+    .player_table TH.odd { color: #330}
 
     .score_col {width: 3em; text-align:right;}
     .name_col {min-width: 4em; text-align:left; white-space:nowrap; }
@@ -86,7 +87,8 @@
 </head>
 <body onLoad="init()">
   <div class="header">
-    <h1>Erlang Quest</h1>
+    <!-- <h1>Erlang Quest</h1> -->
+    <img src="erlangquestlogo4.png" style="margin-top: 0.8em">
   </div>
   <div class="wrapper">
     <div class="column contentpane centerpane">
@@ -99,11 +101,9 @@
           <col span="1" class="name_col"/>
           <col span="1000" class="quest_col">
         </colgroup>
-        <tr>
+        <tr id="ach_header_row">
           <th>Score</th><th>Name</th>
-          <th class="questname">a<br/>n<br/>y<br/>|<br/>v<br/>a<br/>l<br/>u<br/>e</th>
-          <th class="questname">a<br/>n<br/>y<br/>|<br/>r<br/>e<br/>f<br/>e<br/>r<br/>e<br/>n<br/>c<br/>e</th>
-          <th class="filler_col"/>
+          <th id="filler_header" class="filler_col"/>
         </tr>
       </table>
       </div>
@@ -140,10 +140,13 @@
 
   <div id="templates" style="display:none">
     <table>
+    <tr>
+      <th id="quest_header_field" class="questname"></th>
+    </tr>
     <tr id="player_row">
-      <td id="score_field" class="score_col">S</td>
-      <td id="name_field" class="name_col">N</td>
-      <td id="achievement_field" class="questname"/>Q</td>
+      <td id="score_field" class="score_col"></td>
+      <td id="name_field" class="name_col"></td>
+      <td id="achievement_field" class="questname"/></td>
     </tr>
   </table>
   </div>
