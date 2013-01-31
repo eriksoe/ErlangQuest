@@ -86,6 +86,8 @@ handle_event({message, Client, Msg=#msg{}}, State) ->
     error_logger:info_msg("DB| got message: ~p\n", [Msg]),
     handle_sio_message(Client, Msg),
     {ok, State};
+handle_event({'EXIT', _, normal}, State) ->
+    {ok, State};
 handle_event(OtherEvent, State) ->
     error_logger:error_msg("~s got unexpected event: ~p\n", [?MODULE, OtherEvent]),
     {ok, State}.
@@ -153,9 +155,19 @@ handle_request('GET', [], Req) ->
     Req:file(www_filepath("index.html"));
 handle_request('GET', ["quest_webboard.js"=F], Req) ->
     Req:file(www_filepath(F));
+handle_request(Method, [Path], Req) ->
+    case re:run(Path, "[A-Za-z0-9_]*\.(png|jpg)", [{capture,none}]) of
+        match ->
+            io:format("DB| file path=~p\n", [www_filepath(Path)]),
+            Req:file(www_filepath(Path));
+        nomatch ->
+            error_logger:warning_msg("~s: Got request for unknown resource ~s:~p\n",
+                                     [?MODULE, Method, Path]),
+            Req:respond(404)
+    end;
 handle_request(Method, Path, Req) ->
     error_logger:warning_msg("~s: Got request for unknown resource ~s:~p\n",
-                             [Method, Path]),
+                             [?MODULE, Method, Path]),
     Req:respond(404).
 
 handle_sio_message(Client, Msg) ->
