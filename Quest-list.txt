@@ -56,3 +56,6 @@ Numerical problems:
 
 Interpretation:
 - boolean_evaluator
+
+Puzzles and games:
+- labyrinth
