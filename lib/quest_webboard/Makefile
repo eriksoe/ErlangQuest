@@ -20,7 +20,7 @@ console: compile-just-QW
 
 
 run: compile-just-QW
-	erl -pa ../quest_webboard/ebin -pa ../quest/ebin -pa deps/socketio/ebin deps/socketio/deps/misultin/ebin deps/socketio/deps/ossp_uuid/ebin deps/socketio/deps/jsx/ebin deps/socketio/deps/gproc/ebin  -s quest_webboard
+	erl -pa ../quest_webboard/ebin -pa ../quest/ebin -pa deps/socketio/ebin deps/socketio/deps/misultin/ebin deps/socketio/deps/ossp_uuid/ebin deps/socketio/deps/jsx/ebin deps/socketio/deps/gproc/ebin  -s quest_webboard -name "quests@$${MY_IP:-127.0.0.1}" -setcookie questcookie
 
 
 clean:
