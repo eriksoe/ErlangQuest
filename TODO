@@ -1,4 +1,5 @@
 ==== TO DO
+
 - Quests:
   Implementation:
   - primality_check
@@ -24,10 +25,9 @@
   - word_count          // "This is a sentence, is it not?" -> [{"this",1},{"is",2}, {not,1}, ...]
 
 
-- Persistence of achievements & scores
 - Expiry of active challenges
-...
 - Hint system?
+- An (optional) explanation on incorrect_answer results.
 - Web scoreboard
 
 ==== DONE
@@ -35,3 +35,4 @@
 - First quest
 - Basic quest_server.
 - Scoreboard
+- Persistence of achievements & scores
