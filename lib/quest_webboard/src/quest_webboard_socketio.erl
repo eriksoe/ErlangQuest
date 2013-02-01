@@ -23,7 +23,6 @@
 %%%===================================================================
 
 start_link() ->
-    io:format("DB| quest_webboard_socketio:start_link()\n"),
     {ok, Pid} = socketio_listener:start([{http_port, 8000},
                                          {default_http_handler,?MODULE}]),
     {ok, Pid} = socketio_listener:start([{http_port, 8000},
@@ -158,7 +157,6 @@ handle_request('GET', ["quest_webboard.js"=F], Req) ->
 handle_request(Method, [Path], Req) ->
     case re:run(Path, "[A-Za-z0-9_]*\.(png|jpg)", [{capture,none}]) of
         match ->
-            io:format("DB| file path=~p\n", [www_filepath(Path)]),
             Req:file(www_filepath(Path));
         nomatch ->
             error_logger:warning_msg("~s: Got request for unknown resource ~s:~p\n",
@@ -190,7 +188,7 @@ www_filepath(Filename) ->
     filename:join(WwwDir, Filename).
 
 replay_quest_log_from(TS, Client) ->
-    {ok, Ref} = quest_log:async_playback_from(TS),
+    {ok, Ref} = quest_log:async_playback(TS, infinity),
     replay_quest_log_loop(Ref, Client).
 
 replay_quest_log_loop(Ref, Client) ->
@@ -199,17 +197,21 @@ replay_quest_log_loop(Ref, Client) ->
             io:format("DB| replay_quest_log_loop: ~p\n", [Msg]),
             case Msg of
                 eof -> ok; % Done.
+                live ->
+                    replay_quest_log_loop(Ref, Client);
                 {error, Reason} ->
                     error({unable_to_replay, Reason});
                 {log_item, {TS,Item}} ->
                     replay_item(Client, TS, Item),
+                    replay_quest_log_loop(Ref, Client);
+                OtherMsg ->
+                    error_logger:warning_msg("~s:replay_quest_log_loop: Got unexpected message ~p\n", [OtherMsg]),
                     replay_quest_log_loop(Ref, Client)
             end
-    after 15000 ->
-            error({timeout_while_replaying})
     end.
 
-replay_item(Client, TS, {achieved, Username, QuestID, Achieved}) ->
+replay_item(Client, TS, {achieved, Username, QuestID, Achieved}=Msg) ->
+    io:format("DB| socketio ~p: replay_item ~p: ~p\n", [Client, TS, Msg]),
     Points = lists:sum([P || {_,P} <- Achieved]),
     Variants = [a2b(V) || {V,_} <- Achieved],
     socketio_client:send(Client, #msg{json=true,

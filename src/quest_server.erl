@@ -244,7 +244,7 @@ add_to_user_score(Username, Amount, #state{user_scores=ScoresTab}) ->
 %%%===================================================================
 
 init_from_log(State) ->
-    {ok, Ref} = quest_log:async_playback_from(0),
+    {ok, Ref} = quest_log:async_playback(epoch, now),
     restore_loop(Ref, State, 0).
 
 restore_loop(Ref, State, N) ->
@@ -252,6 +252,7 @@ restore_loop(Ref, State, N) ->
         {Ref, Msg} ->
             case Msg of
                 eof -> {ok, N}; % Done.
+                live -> {ok, N}; % Done.
                 {error, Reason} ->
                     error({unable_to_restore_state, Reason});
                 {log_item, {TS,Item}} ->
