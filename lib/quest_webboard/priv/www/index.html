@@ -67,20 +67,24 @@
 
     .score_col {width: 3em; text-align:right;}
     .name_col {min-width: 4em; text-align:left; white-space:nowrap; }
-    .quest_col {text-align:center}
+    .player_table .quest_col {
+        text-align:center;
+        margin: 0em; padding: 0 0.25em;
+    }
     .filler_col {width: 100%;}
 
     .player_table TH.questname {
       font-family: courier; font-weight: normal; text-align:center;
-      line-height: 0.9;
-      margin: 0em; padding: 0 0.35em;
-    }
-    .player_table TD.questname {
-      margin: 0; padding: 0;
+      line-height: 0.8;
     }
 
     .highscore_table {
       margin-top: 0.5em;
+    }
+
+    .rot90 {
+      transform: rotate(90deg);
+      margin: 0; padding: 0;
     }
 
     </style>
@@ -141,12 +145,12 @@
   <div id="templates" style="display:none">
     <table>
     <tr>
-      <th id="quest_header_field" class="questname"></th>
+      <th id="quest_header_field" class="questname quest_col"></th>
     </tr>
     <tr id="player_row">
       <td id="score_field" class="score_col"></td>
       <td id="name_field" class="name_col"></td>
-      <td id="achievement_field" class="questname"/></td>
+      <td id="achievement_field" class="quest_col"/></td>
     </tr>
   </table>
   </div>
