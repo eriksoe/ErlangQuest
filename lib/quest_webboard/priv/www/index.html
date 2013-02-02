@@ -52,6 +52,7 @@
     .rightpane  { width: 30%; }
 
     .table_wrapper { overflow: auto; min-height: 20em; }
+    .list_wrapper { overflow: auto; min-height: 20em; }
 
     .player_table {
       width: 100%;
@@ -113,6 +114,7 @@
       </div>
     </div>
     <div class="column rightpane">
+      <!-- 
       <div class="contentpane">
         <h2>Highscore</h2>
         <div class="ruler"></div>
@@ -129,18 +131,23 @@
         </tr>
       </table>
         </div>
-
       </div>
-      <div class="contentpane" style="margin-top: 1em">
+ -->
+      <div class="contentpane"> <!-- style="margin-top: 1em" -->
         <h2>Recent events</h2>
         <div class="ruler"></div>
-        <div style="min-height:18em">Ipsum</div>
+        <div class="list_wrapper" style="height:18em">
+          <ul id="event_list" class="event-list">
+          </ul>
+        </div>
       </div>
     </div>
   </div>
+    <!--
   <div style="clear:both; width: 100%; bottom: -0px; text-align: center; font-size: 75%; color: #00AAAA">
     Footer!
   </div>
+ -->
 
   <div id="templates" style="display:none">
     <table>
@@ -153,6 +160,9 @@
       <td id="achievement_field" class="quest_col"/></td>
     </tr>
   </table>
+  <ul>
+    <li id="event_entry"></li>
+  </ul>
   </div>
 </body>
 </html>
