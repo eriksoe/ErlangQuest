@@ -58,4 +58,5 @@ Interpretation:
 - boolean_evaluator
 
 Puzzles and games:
+- fifteen
 - labyrinth

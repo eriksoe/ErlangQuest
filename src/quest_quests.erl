@@ -263,6 +263,80 @@ gen_closest_fraction_problem(MinN, MaxN) ->
     {'$remember', {A,B}, Input}.
 
 %%%----------
+fifteen() ->
+    #quest{generate=fun() -> make_fifteen(1) end,
+           verify=fun verify_fifteen/2}.
+
+make_fifteen(NIter) ->
+    S0 = lists:foldl(fun(I,D) ->
+                            dict:store(fifteen_number_to_point(I), I, D)
+                     end,
+                     dict:new(),
+                     lists:seq(1,15)),
+    {S1,_EndGapX,_EndGapY} =
+        lists:foldl(fun(_,{D,GapX,GapY}) ->
+                            Dir = rnd_integer(1,4),
+                            DX = element(Dir, {0,1,0,-1}),
+                            DY = element(Dir, {1,0,-1,0}),
+                            NewX = GapX + DX,
+                            NewY = GapY + DY,
+                            if NewX>=0, NewX<4,
+                               NewY>=0, NewY<4 ->
+                                    D2 = fifteen_move({NewX,NewY}, {GapX,GapY}, D),
+                                    {D2, NewX, NewY};
+                               true -> % Out of bounds - No change
+                                    {D,GapX,GapY}
+                            end
+                    end,
+                    {S0, 3,3},
+                    lists:seq(1, NIter)),
+    dict_to_fifteen_board(S1).
+
+verify_fifteen(Board, Path) ->
+    lists:all(fun(P) when is_integer(P), P>=1, P=<15 -> true;
+                 (_) -> false
+              end, Path)
+        orelse throw(bad_answer_type),
+    {S0,_} =
+        lists:foldl(fun(V,{D,I}) ->
+                            {dict:store(V, fifteen_number_to_point(I), D),
+                             I+1}
+                    end,
+                    {dict:new(),1},
+                    lists:concat(Board)),
+    S1 = lists:foldl(fun(SwapV, D) ->
+                             GapPos = dict:fetch(x, D),
+                             SwapPos = dict:fetch(SwapV, D),
+                             are_neighbours_2D(GapPos, SwapPos) orelse
+                                 throw(bad_move),
+                             dict:store(x, SwapPos, dict:store(SwapV, GapPos, D))
+                     end,
+                     S0,
+                     Path),
+    Positions = lists:sort(dict:to_list(S1)),
+    Expected = [{V, {(V-1) rem 4, (V-1) div 4}}
+                || V <- lists:seq(1,15)]
+        ++ [{x,{3,3}}],
+    Positions =:= Expected.
+
+dict_to_fifteen_board(D) ->
+    [[case dict:find({X,Y}, D) of
+          {ok, V} -> V;
+          error -> x
+      end
+      || X <- lists:seq(0,3)]
+     || Y <- lists:seq(0,3)].
+
+fifteen_number_to_point(I) ->
+    X = (I-1) rem 4,
+    Y = (I-1) div 4,
+    {X,Y}.
+
+fifteen_move(From, To, D) ->
+    V = dict:fetch(From, D),
+    dict:store(To, V, dict:erase(From, D)).
+
+%%%----------
 
 labyrinth() ->
     #quest{generate=fun() -> make_labyrinth(40) end,
@@ -349,6 +423,11 @@ is_latin1_string([H|T]) ->
         is_latin1_string(T);
 is_latin1_string(_) -> false.
 
+are_neighbours_2D({X1,Y1}, {X2,Y2}) when is_integer(X1),
+                                         is_integer(Y1),
+                                         is_integer(X2),
+                                         is_integer(Y2) ->
+    abs(X1-X2) + abs(Y1-Y2) =:= 1.
 %%%==================== Union-find data structure ====================
 uf_new() -> dict:new().
 
