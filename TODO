@@ -28,7 +28,6 @@
 - Expiry of active challenges
 - Hint system?
 - An (optional) explanation on incorrect_answer results.
-- Web scoreboard
 
 ==== DONE
 - Quest interface.
@@ -36,3 +35,4 @@
 - Basic quest_server.
 - Scoreboard
 - Persistence of achievements & scores
+- Web scoreboard
