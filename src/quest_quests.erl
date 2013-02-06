@@ -53,9 +53,11 @@ quest_list() ->
        "of the digits.",
        "Example: \"1749\" -> 21"]},
      {rot13,             15, 6,
-     ["Given a string, return the string as encrypted with ROT13. ",
-      "(See http://en.wikipedia.org/wiki/ROT13). ",
-      "Example: \"Hello!\" -> \"Uryyb!\""]},
+      ["Given a string, return the string as encrypted with ROT13. ",
+       "(See http://en.wikipedia.org/wiki/ROT13). ",
+       "Example: \"Hello!\" -> \"Uryyb!\""]},
+     {word_count,        15, 7,
+      "Given a string, return with the number of words (stretches of A-Z/a-z) it contains."},
      {primality_check,   20, 7, "Given a list of integers, answer with a list of booleans indicating whether the corresponding number is a prime."},
      {boolean_evaluator, 30, 15,
       ["Given a boolean expression of the grammar:",
@@ -266,6 +268,12 @@ verify_rot13_chars(In,Out) ->
            true ->
                 In=:=Out
         end.
+
+word_count() ->
+    #quest{generate=fun() -> {S,N} = rnd_sentence_x(),
+                             {'$remember', N, S}
+                    end,
+           verify=fun({'$remember', N, _}, Answer) -> Answer=:=N end}.
 
 
 %%%----------
@@ -605,7 +613,14 @@ rnd_word_separator() ->
      || _ <- lists:seq(1, rnd_integer(1,7))].
 
 rnd_sentence() ->
-    lists:flatten([[rnd_word_separator() || rnd_bool()],
-                   [rnd_word() ++ rnd_word_separator()
-                    || _ <- lists:seq(1, rnd_integer(10,20))],
-                   [rnd_word() || rnd_bool()]]).
+    {S,_} = rnd_sentence_x(),
+    S.
+rnd_sentence_x() ->
+    NWords1 =rnd_integer(10,20),
+    NWords2 = rnd_integer(0,1),
+    S = lists:flatten([[rnd_word_separator() || rnd_bool()],
+                       [rnd_word() ++ rnd_word_separator()
+                        || _ <- lists:seq(1, NWords1)],
+                       [rnd_word() || NWords2>0]]),
+    {S, NWords1+NWords2}.
+
