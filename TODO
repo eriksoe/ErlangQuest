@@ -16,7 +16,6 @@
   - tree_builder_server
   - add_calculator      // ["1+2+3", "9  +10+1+0"] -> [6,20]
   - simple_calculator	// ["1 + 2", "3*  4"] -> [3,12]
-  - lisp_calculator	// "(+ 1 ( - 4 3))" -> 2
 
 
 - Expiry of active challenges

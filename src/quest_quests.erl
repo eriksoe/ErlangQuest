@@ -69,6 +69,11 @@ quest_list() ->
        "(containing integers and the operators +, - and *), ",
        "calculate the result.",
        "Examples: \"1 2+\" -> 3;     \" 1 2 3  4 **+ \" -> 25"]},
+     {lisp_calculator,    20, 10,
+      ["Given a string containing an expression in lisp notation ",
+       "(built from integers and the binary operators +, - and *), ",
+       "calculate the result.",
+       "Examples: \"(+ 1 2)\" -> 3;  \" (+ 100 (- ( * 2 3) 4)) \" -> 102"]},
      {boolean_evaluator, 30, 15,
       ["Given a boolean expression of the grammar:",
        "expr ::= a | b | c       % Variables",
@@ -311,6 +316,28 @@ postfix_calculator() ->
                                                    '*' -> OpS="*", R=R1*R2
                                                end,
                                                E = E1++rnd_spaces(1,2)++E2++rnd_spaces(0,2)++OpS,
+                                               {E,R}
+                                       end,
+                            {Exp,Res} = rnd_arith_exp(rnd_integer(10,20),
+                                                      LeafFun, BinopFun),
+                            {'$remember', Res, Exp}
+                    end,
+           verify=fun({'$remember', N, _}, Answer) -> Answer=:=N end}.
+
+lisp_calculator() ->
+    #quest{generate=fun() ->
+                            LeafFun = fun(X)-> {integer_to_list(X),X} end,
+                            BinopFun = fun(Op, {E1,R1}, {E2,R2}) ->
+                                               case Op of
+                                                   '+' -> OpS="+", R=R1+R2;
+                                                   '-' -> OpS="-", R=R1-R2;
+                                                   '*' -> OpS="*", R=R1*R2
+                                               end,
+                                               E = "("++rnd_spaces(0,2)
+                                                   ++OpS++rnd_spaces(1,2)
+                                                   ++E1++rnd_spaces(1,2)
+                                                   ++E2++rnd_spaces(0,2)
+                                                   ++")",
                                                {E,R}
                                        end,
                             {Exp,Res} = rnd_arith_exp(rnd_integer(10,20),
