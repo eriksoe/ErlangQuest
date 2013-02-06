@@ -42,6 +42,8 @@ quest_list() ->
                                  "  'reference' if it is a reference",
                                  "  '{closure, Arity}' if it is a function object of arity Arity"]},
      {sum_of_numbers,     8, 3, "Given a list of numbers, answer with their sum."},
+     {min_and_max,        8, 3, ["Given a list of numbers, answer with {Min,Max}, where ",
+                                 "Min is the smallest of the numbers and Max is the largest."]},
      {even_count,         8, 3, "Given a list of integers, answer how many of them are even."},
      {tuple_swap,         8, 2, "Given a pair (2-tuple), answer with a pair with the same elements, but swapped."},
      {base_7,            14, 5, "Given a positive integer, answer with a string containing the base 7 representation of the number."},
@@ -185,6 +187,17 @@ correct_type2(_,_) -> false.
 sum_of_numbers() ->
     #quest{generate=fun()->[rnd_integer() || _ <- lists:seq(1,5+rnd_integer(15))] end,
            verify=fun(Input,Answer) -> Answer=:=lists:sum(Input) end}.
+
+min_and_max() ->
+    #quest{generate=fun()->[rnd_integer() || _ <- lists:seq(1,10+rnd_integer(10))] end,
+           verify=fun(Input,{Min,Max}) ->
+                          lists:member(Min, Input)
+                              andalso
+                          lists:member(Max, Input)
+                              andalso
+                              lists:all(fun(X) -> X>= Min andalso X =< Max end,
+                                        Input)
+                  end}.
 
 even_count() ->
     #quest{generate=fun()->[rnd_integer() || _ <- lists:seq(1,10+rnd_integer(30))] end,

@@ -22,13 +22,16 @@ List handling:
 - (sum_of_digits)
 - even_count
 - (last_value_wins)
-- (min_and_max)
+- min_and_max
 
 Tree handling:
 - (leftmost_and_rightmost)
 - (tree_paths)
 - (tree_builder)
 - (tree_builder_server)
+
+Binary handling:
+- (one_bits_in_binary)
 
 Conversions:
 - base_7
@@ -48,6 +51,8 @@ Processes:
 - (send_message)
 - (ping_from_new_process)
 
+Bit processing:
+- (one_bits_in_integer)
 
 Numerical problems:
 - (primality_check)
