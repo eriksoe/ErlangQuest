@@ -48,6 +48,10 @@ quest_list() ->
      {tuple_swap,         8, 2, "Given a pair (2-tuple), answer with a pair with the same elements, but swapped."},
      {base_7,            14, 5, "Given a positive integer, answer with a string containing the base 7 representation of the number."},
      {tuple_rotate,      20, 5, "Given a tuple of an unknown arity, rotate the elements one place to the left."},
+     {rot13,             15, 6,
+     ["Given a string, return the string as encrypted with ROT13. ",
+      "(See http://en.wikipedia.org/wiki/ROT13). ",
+      "Example: \"Hello!\" -> \"Uryyb!\""]},
      {primality_check,   20, 7, "Given a list of integers, answer with a list of booleans indicating whether the corresponding number is a prime."},
      {boolean_evaluator, 30, 15,
       ["Given a boolean expression of the grammar:",
@@ -226,6 +230,28 @@ tuple_rotate() ->
                                                 end,
                                                 lists:seq(2,N))
                   end}.
+
+rot13() ->
+    #quest{generate=fun()->rnd_sentence() end,
+           verify=fun(Input,Answer) ->
+                          length(Input)==length(Answer)
+                              andalso
+                              lists:all(fun({In,Out}) ->
+                                                verify_rot13_chars(In,Out)
+                                        end,
+                                        lists:zip(Input, Answer))
+                  end}.
+
+verify_rot13_chars(In,Out) ->
+    InIsAlpha = is_alpha_char(In),
+    OutIsAlpha = is_alpha_char(Out),
+    InIsAlpha==OutIsAlpha
+        andalso
+        if InIsAlpha ->
+                abs(In-Out)=:=13;
+           true ->
+                In=:=Out
+        end.
 
 
 %%%----------
@@ -436,6 +462,11 @@ is_latin1_string([H|T]) ->
         is_latin1_string(T);
 is_latin1_string(_) -> false.
 
+is_alpha_char(C) ->
+    is_integer(C) andalso
+    (($a =< C andalso C =< $z) orelse
+     ($A =< C andalso C =< $Z)).
+
 are_neighbours_2D({X1,Y1}, {X2,Y2}) when is_integer(X1),
                                          is_integer(Y1),
                                          is_integer(X2),
@@ -534,6 +565,9 @@ rnd_binary() ->
 char_atom() ->
     list_to_atom([$a + rnd_integer(26)-1]).
 
+rnd_bool() ->
+    crypto:rand_uniform(0,2)==1.
+
 rnd_of(L) ->
     lists:nth(rnd_integer(length(L)), L).
 
@@ -548,4 +582,16 @@ rnd_bool_exp(Sz) when Sz > 0 ->
             {BinOp, rnd_bool_exp(LeftSz), rnd_bool_exp(RightSz)}
     end.
 
+rnd_word() ->
+    [rnd_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+     || _ <- lists:seq(1, rnd_integer(1,10))].
 
+rnd_word_separator() ->
+    [rnd_of(" !?,.;:-\n\t")
+     || _ <- lists:seq(1, rnd_integer(1,7))].
+
+rnd_sentence() ->
+    lists:flatten([[rnd_word_separator() || rnd_bool()],
+                   [rnd_word() ++ rnd_word_separator()
+                    || _ <- lists:seq(1, rnd_integer(10,20))],
+                   [rnd_word() || rnd_bool()]]).
