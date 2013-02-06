@@ -59,6 +59,11 @@ quest_list() ->
      {word_count,        15, 7,
       "Given a string, return with the number of words (stretches of A-Z/a-z) it contains."},
      {primality_check,   20, 7, "Given a list of integers, answer with a list of booleans indicating whether the corresponding number is a prime."},
+     {add_calculator,    20, 9,
+      ["Given a string containing a simple addition expression of the form ",
+       "\"A + B\", where A and B are integers, calculate the sum.",
+       "The string may contain spaces.",
+       "Examples: \"1+2\" -> 3;     \" 19+  27 \" -> 46"]},
      {boolean_evaluator, 30, 15,
       ["Given a boolean expression of the grammar:",
        "expr ::= a | b | c       % Variables",
@@ -275,6 +280,21 @@ word_count() ->
                     end,
            verify=fun({'$remember', N, _}, Answer) -> Answer=:=N end}.
 
+
+%%%---------- Calculators:
+add_calculator() ->
+    #quest{generate=fun() -> A = rnd_integer(100,100000),
+                             B = rnd_integer(100,100000),
+                             S = rnd_spaces(0,3)
+                                 ++ integer_to_list(A)
+                                 ++ rnd_spaces(0,3)
+                                 ++ "+"
+                                 ++ rnd_spaces(0,3)
+                                 ++ integer_to_list(B)
+                                 ++ rnd_spaces(0,3),
+                             {'$remember', A+B, S}
+                    end,
+           verify=fun({'$remember', N, _}, Answer) -> Answer=:=N end}.
 
 %%%----------
 boolean_evaluator() ->
@@ -611,6 +631,9 @@ rnd_word() ->
 rnd_word_separator() ->
     [rnd_of(" !?,.;:-\n\t")
      || _ <- lists:seq(1, rnd_integer(1,7))].
+
+rnd_spaces(Min,Max) ->
+    [$\s || _ <- lists:seq(1, rnd_integer(Min,Max))].
 
 rnd_sentence() ->
     {S,_} = rnd_sentence_x(),

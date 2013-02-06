@@ -38,9 +38,10 @@ Conversions:
 - tuple_rotate
 
 String parsing:
-- (word_count)
-- (simple_add_calculator)
-- (add_calculator)
+- word_count
+- (word_count2)          // "This is a sentence, is it not?" -> [{"this",1},{"is",2}, {not,1}, ...]
+- add_calculator
+- (add_calculator2)     // "1 + 23 + 456" -> 480
 - (simple_calculator)
 - (postfix_calculator)
 - (lisp_calculator)
