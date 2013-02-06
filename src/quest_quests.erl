@@ -62,8 +62,13 @@ quest_list() ->
      {add_calculator,    20, 9,
       ["Given a string containing a simple addition expression of the form ",
        "\"A + B\", where A and B are integers, calculate the sum.",
-       "The string may contain spaces.",
+       "The expression may contain spaces.",
        "Examples: \"1+2\" -> 3;     \" 19+  27 \" -> 46"]},
+     {postfix_calculator,    20, 9,
+      ["Given a string containing an expression in postfix notation ",
+       "(containing integers and the operators +, - and *), ",
+       "calculate the result.",
+       "Examples: \"1 2+\" -> 3;     \" 1 2 3  4 **+ \" -> 25"]},
      {boolean_evaluator, 30, 15,
       ["Given a boolean expression of the grammar:",
        "expr ::= a | b | c       % Variables",
@@ -295,6 +300,34 @@ add_calculator() ->
                              {'$remember', A+B, S}
                     end,
            verify=fun({'$remember', N, _}, Answer) -> Answer=:=N end}.
+
+postfix_calculator() ->
+    #quest{generate=fun() ->
+                            LeafFun = fun(X)-> {integer_to_list(X),X} end,
+                            BinopFun = fun(Op, {E1,R1}, {E2,R2}) ->
+                                               case Op of
+                                                   '+' -> OpS="+", R=R1+R2;
+                                                   '-' -> OpS="-", R=R1-R2;
+                                                   '*' -> OpS="*", R=R1*R2
+                                               end,
+                                               E = E1++rnd_spaces(1,2)++E2++rnd_spaces(0,2)++OpS,
+                                               {E,R}
+                                       end,
+                            {Exp,Res} = rnd_arith_exp(rnd_integer(10,20),
+                                                      LeafFun, BinopFun),
+                            {'$remember', Res, Exp}
+                    end,
+           verify=fun({'$remember', N, _}, Answer) -> Answer=:=N end}.
+
+rnd_arith_exp(0, LeafFun, _BinopFun) ->
+    LeafFun(rnd_integer(0,100));
+rnd_arith_exp(Sz, LeafFun, BinopFun) when Sz > 0 ->
+    BinOp = rnd_of(['+', '-', '*']),
+    LeftSz = rnd_integer(Sz)-1,
+    RightSz = Sz-1-LeftSz,
+    BinopFun(BinOp,
+             rnd_arith_exp(LeftSz , LeafFun, BinopFun),
+             rnd_arith_exp(RightSz, LeafFun, BinopFun)).
 
 %%%----------
 boolean_evaluator() ->

@@ -43,7 +43,7 @@ String parsing:
 - add_calculator
 - (add_calculator2)     // "1 + 23 + 456" -> 480
 - (simple_calculator)
-- (postfix_calculator)
+- postfix_calculator
 - (lisp_calculator)
 
 
