@@ -48,6 +48,10 @@ quest_list() ->
      {tuple_swap,         8, 2, "Given a pair (2-tuple), answer with a pair with the same elements, but swapped."},
      {base_7,            14, 5, "Given a positive integer, answer with a string containing the base 7 representation of the number."},
      {tuple_rotate,      20, 5, "Given a tuple of an unknown arity, rotate the elements one place to the left."},
+     {sum_of_digits,     10, 4,
+      ["Given a string representing a natural number, answer with the sum ",
+       "of the digits.",
+       "Example: \"1749\" -> 21"]},
      {rot13,             15, 6,
      ["Given a string, return the string as encrypted with ROT13. ",
       "(See http://en.wikipedia.org/wiki/ROT13). ",
@@ -230,6 +234,16 @@ tuple_rotate() ->
                                                 end,
                                                 lists:seq(2,N))
                   end}.
+
+sum_of_digits() ->
+    #quest{generate=fun() -> L = [rnd_integer(0,9)
+                                  || _ <- lists:seq(1, rnd_integer(8,20))],
+                             S = [X+$0 || X <- L],
+                             {'$remember', L, S}
+                    end,
+           verify = fun({'$remember', L, _}, Answer) ->
+                            Answer =:= lists:sum(L)
+                    end}.
 
 rot13() ->
     #quest{generate=fun()->rnd_sentence() end,

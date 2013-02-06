@@ -18,8 +18,8 @@ Type basics:
 
 List handling:
 - sum_of_numbers
-- (rot13)
-- (sum_of_digits)
+- rot13
+- sum_of_digits
 - even_count
 - (last_value_wins)
 - min_and_max
