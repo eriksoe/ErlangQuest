@@ -52,6 +52,17 @@ quest_list() ->
       ["Given a string representing a natural number, answer with the sum ",
        "of the digits.",
        "Example: \"1749\" -> 21"]},
+     {reverse_2nds,       15, 4,
+      ["Given a list of pairs [{A1,B1},...,{An,Bn}], answer with the list",
+       "[{A1,Bn},...,{An,B1}] where the order of the Bs has been reversed.",
+       "Example:",
+       "  [{1,a},{2,b},{3,c},{4,d}] -> [{1,d},{2,c},{3,b},{4,a}]"]},
+     {last_value_wins,   15, 5,
+      ["Given a list of key-value pairs, determine - for each key - the ",
+       "last value in the list for that key.",
+       "Return those last values in the form of a list of key-value pairs."
+       "Example: ",
+       "  [{a,8},{b,7},{a,1},{c,7},{b,5}] -> [{a,1},{b,5},{c,7}]"]},
      {rot13,             15, 6,
       ["Given a string, return the string as encrypted with ROT13. ",
        "(See http://en.wikipedia.org/wiki/ROT13). ",
@@ -261,6 +272,34 @@ sum_of_digits() ->
            verify = fun({'$remember', L, _}, Answer) ->
                             Answer =:= lists:sum(L)
                     end}.
+
+reverse_2nds() ->
+    #quest{generate=fun() ->
+                            Len = rnd_integer(8,20),
+                            As = [char_atom() || _ <- lists:seq(1,Len)],
+                            Bs = [rnd_integer() || _ <- lists:seq(1,Len)],
+                            {'$remember', {As,Bs}, lists:zip(As,Bs)}
+                    end,
+           verify = fun({'$remember', {As,Bs}, _}, Answer) ->
+                               Answer =:= lists:zip(As, lists:reverse(Bs))
+                    end}.
+
+last_value_wins() ->
+    #quest{generate=fun() -> [{char_atom(6), rnd_integer()}
+                                  || _ <- lists:seq(1, rnd_integer(10,20))]
+                    end,
+           verify=fun(Input,Answer) ->
+                          ExpectedKeys = lists:usort([K || {K,_}<-Input]),
+                          ActualKeys = lists:sort([K || {K,_}<-Answer]),
+                          RevInput = lists:reverse(Input),
+                          ActualKeys=:=ExpectedKeys % Checks also for duplicates
+                              andalso
+                              lists:all(fun(K)->
+                                                lists:keyfind(K,1,RevInput)=:=
+                                                lists:keyfind(K,1,Answer)
+                                        end,
+                                        ExpectedKeys)
+                  end}.
 
 rot13() ->
     #quest{generate=fun()->rnd_sentence() end,
@@ -666,6 +705,9 @@ rnd_binary() ->
 
 char_atom() ->
     list_to_atom([$a + rnd_integer(26)-1]).
+
+char_atom(N) ->
+    list_to_atom([$a + rnd_integer(N)-1]).
 
 rnd_bool() ->
     crypto:rand_uniform(0,2)==1.

@@ -21,8 +21,9 @@ List handling:
 - rot13
 - sum_of_digits
 - even_count
-- last_value_wins
 - min_and_max
+- last_value_wins
+- reverse_2nds
 
 Tree handling:
 - (leftmost_and_rightmost)
