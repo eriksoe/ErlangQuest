@@ -253,7 +253,8 @@ restore_loop(Ref, State, N) ->
         {Ref, Msg} ->
             case Msg of
                 eof -> {ok, N}; % Done.
-                live -> {ok, N}; % Done.
+                live ->
+                    restore_loop(Ref, State, N); % Keep reading to eof.
                 {error, Reason} ->
                     error({unable_to_restore_state, Reason});
                 {log_item, {TS,Item}} ->
