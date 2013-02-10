@@ -17,8 +17,9 @@ help_text() ->
         "* quest:help() -- shows this text.\n"++
         "* quest:list(Username) -- shows the quests currently available to you.\n"++
         "* quest:score(Username) -- shows your accomplishments so far.\n"++
+        "* quest:describe_quest(QuestID) -- shows a description of a quest.\n"++
         "* quest:get_challenge(Username, QuestID) -- requests a challenge.\n"++
-        "    Returns {ChallengeID, Points, Description, Input}.\n"++
+        "    Returns {ChallengeID, Input}.\n"++
         "* quest:answer_challenge(ChallengeID, Answer) -- answers a challenge.\n"++
         "    Returns {achievement_unlocked, [...]}\n"++
         "    or      {correct_but_nothing_unlocked, [...]}\n"++
@@ -28,7 +29,7 @@ help_text() ->
         "* quest:submit(Username, QuestID, SolutionFun) -- shortcut for\n"++
         "    submitting a solution to a quest.\n"++
         "    Is equivalent to:\n"++
-        "      {CID,_,_,Input}=quest:get_challenge(Username, QuestID),\n"++
+        "      {CID,Input}=quest:get_challenge(Username, QuestID),\n"++
         "      quest:answer_challenge(CID,SolutionFun(Input))\n"++
         "\n"++
         "Each quest has two levels: slow and fast.  You get points the first time you\n"++

@@ -34,7 +34,7 @@ The short version is:
       MY_IP=... make start-server
     Player:
       MY_IP=... SERVER_IP=... make start-client
-      quest:help().
+      > quest:help().
 
 See below for the longer version.
 
@@ -79,34 +79,49 @@ How to play
 
 As a player, the most important command to know is
 
-    quest:help().
+    > quest:help().
 
 which does a bit of explaining.
 
 Basically, what you do is
 
-    quest:list(usr).
+    > quest:list(usr).
 
 (if your username is usr) to see what quests are available to you.
 There may be more quests, but hidden from you until you gain enough points.
 
-Next, you select a quest (here the one called 'any_answer'), and do:
+Next, you ask for a description of a quest (here the one called 'any_answer'):
 
-    quest:get_challenge(usr, any_answer).
-    => {15776378160770091960,1,"Answer with any value whatsoever.", dummy}
+    > quest:describe_quest(any_answer).
+    =>
+    Quest 'any_answer':                            (Worth: 1.  Requires: 0.)
+      Answer with any value whatsoever.
+    
+    ok
 
-The four elements here are: a challenge ID, the number of points this
-quest is worth, a description of what it requires, and an input --
-here just a dummy value.
+This shows what the quest is about, as well as how many points can be
+gained by solving it (here 1), and how many points you need to have already
+for the quest to be available to you (here 0).
+
+You can accept a quest in two ways.  For solving it manually, do this:
+
+    > quest:get_challenge(usr, any_answer).
+    => {15776378160770091960,dummy}
+
+There are two elements here: a challenge ID and an input --
+the input usually contains the data necessary to solve the quest,
+but is for this particular quest just a dummy value.
 
 You then answer by:
 
-    quest:answer_challenge(15776378160770091960, any_value).
+    > quest:answer_challenge(15776378160770091960, any_value).
     => {achievement_unlocked, ...}
 
-The two steps of getting and answering a challenge may be combined thus:
+The second way of accepting a quest combines these two steps -- of
+getting and answering a challenge.  It involves passing a function
+which solves the quest to 'quest:submit/2', like this:
 
-    quest:submit(usr, any_answer, fun(_Input) -> any_value end).
+    > quest:submit(usr, any_answer, fun(_Input) -> any_value end).
     => {achievement_unlocked, ...}
 
 Have fun!
@@ -118,6 +133,7 @@ Technical stuff
 Only the "quest" module is needed by the players.  For multi-player
 use, it is sufficient to distribute that module, as well as an easy
 way to start a client node (like the "start-client" Makefile target).
+
 
 
 ----------
