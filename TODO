@@ -8,7 +8,6 @@
   - receive_message
   - send_message
   - ping_from_new_process
-  - last_value_wins
   - min_and_max_server
   - leftmost_and_rightmost
   - tree_paths          // {{a,b},{a,c}} -> [{a,[[l,l],[r,l]]}, {b,[[l,r]]}, {c,[[r,r]]}]
