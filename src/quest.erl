@@ -3,6 +3,7 @@
 -export([help/0,
          list/1,
          score/1,
+         describe_quest/1,
          get_challenge/2,
          answer_challenge/2,
          submit/3
@@ -48,6 +49,29 @@ list(Username) when is_atom(Username) ->
 score(Username) when is_atom(Username) ->
     gen_server:call(?SERVER, {score, Username}).
 
+describe_quest(QuestID) ->
+    case gen_server:call(?SERVER, {describe_quest, QuestID}) of
+        {ok, LevelRequired, PointsWorth, Description} ->
+            io:format("Quest ~-40s (Worth: ~b.  Requires: ~b.)~n",
+                      [["'",atom_to_list(QuestID),"':"],
+                       PointsWorth, LevelRequired]),
+            %% io:format("(Points worth: ~b.  Level required: ~b.)~n",
+            %%           [PointsWorth, LevelRequired]),
+            print_quest_description(Description),
+            io:format("~n");
+        {error,_}=Error ->
+            Error
+    end.
+
+print_quest_description(Str) when is_list(Str), is_integer(hd(Str)) ->
+    print_quest_description([Str]);
+print_quest_description(L) ->
+    lists:foreach(fun(S) when is_list(S) ->
+                          io:format("  ~s\n", [S])
+                  end,
+                  L),
+    ok.
+
 get_challenge(Username, QuestID) when is_atom(Username), is_atom(QuestID) ->
     gen_server:call(?SERVER, {get_challenge, Username, QuestID}).
 
@@ -59,7 +83,7 @@ submit(Username, QuestID, SolutionFun) when is_atom(Username),
                                             is_function(SolutionFun,1) ->
     case quest:get_challenge(Username, QuestID) of
         {error,_}=Error -> Error;
-        {ChallengeID,_,_,Input} ->
+        {ChallengeID,Input} ->
             quest:answer_challenge(ChallengeID, SolutionFun(Input))
     end.
 

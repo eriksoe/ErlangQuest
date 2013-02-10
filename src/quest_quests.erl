@@ -130,9 +130,9 @@ quest_list() ->
        "or vertically.  Answer with the path on the type [{X,Y}], where each ",
        "{X,Y} is the coordinate of a cell on the path.",
        "Example: ",
-       "[\"x xx \",",
-       " \"x    \",",
-       " \"xx xx\"]   -> [{2,1}, {2,2}, {3,2}, {3,3}}]"
+       "  [\"x xx \",",
+       "   \"x    \",",
+       "   \"xx xx\"]   -> [{2,1}, {2,2}, {3,2}, {3,3}}]"
       ]}
     ].
 

@@ -66,6 +66,9 @@ init([]) ->
 handle_call({list, Username}, _From, State) ->
     Reply = quests_available_to_user(Username, State),
     {reply, Reply, State};
+handle_call({describe_quest, QuestName}, _From, State) ->
+    Reply = describe_quest(QuestName),
+    {reply, Reply, State};
 handle_call({get_challenge, Username, QuestID}, _From, State) ->
     try get_challenge(Username, QuestID, State) of
         Reply -> {reply, Reply, State}
@@ -128,6 +131,14 @@ quests_available_to_user(Username, State) ->
 get_user_achievements(Username, State) ->
     %% TODO: Add achievement list.
     [{current_score, get_user_score(Username, State)}].
+
+describe_quest(QuestID) ->
+    case quest_by_name(QuestID) of
+        false ->
+            {error, {unknown_quest, QuestID}};
+        {_QuestID, LevelRequired, PointsWorth, Description} ->
+            {ok, LevelRequired, PointsWorth, Description}
+    end.
 
 get_challenge(Username, QuestID, State) ->
     case quest_by_name(QuestID) of
@@ -195,7 +206,7 @@ add_achievements(Username, QuestID, Points, Elapsed,
 
 make_challenge(Quest, Username, #state{active_challenges = ACTab}) ->
     ChallengeID = gen_challenge_id(),
-    {QuestID, _LevelRequired, PointsWorth, Description} = Quest,
+    {QuestID, _LevelRequired, _PointsWorth, _Description} = Quest,
     #quest{generate=GenFun} = quest_functions(QuestID),
     ChallengeSpec = GenFun(),
     ets:insert(ACTab, #active_challenge{id=ChallengeID,
@@ -207,7 +218,7 @@ make_challenge(Quest, Username, #state{active_challenges = ACTab}) ->
                 {'$remember', _, I} -> I;
                 I -> I
             end,
-    {ChallengeID, PointsWorth, Description, Input}.
+    {ChallengeID, Input}.
 
 %%%===================================================================
 %%% Quests
