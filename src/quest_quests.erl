@@ -110,6 +110,24 @@ quest_list() ->
        "If there is more than one answer, pick the one with lowest Denominator.",
        "Answer with the tuple {Enumerator,Denominator}.",
        "Example: {0.36, 6} -> {1,3}."]},
+     {bounce, 25, 10,
+     ["A physics setup consists of a ball and two inclined planes.",
+      "The planes are arranged in a V-shape as described by  Y=abs(X).",
+      "The ball is released from somewhere above this V and bounces when it ",
+      "hits the planes.",
+      "The setup is idealised: The ball is point-shaped, the planes stretch until ",
+      "infinity, and all bounces are perfectly elastic.",
+      "The ball is affected by gravity: a constant force of (0,-1).",
+      "Given that the ball is released at time T0 = 0 with no initial velocity, ",
+      "at a position described by the input of the form {X0,Y0}, ",
+      "answer with the coordinates in time and space of the first five collisions ",
+      "of the ball with the line segments, on the form {T,{X,Y}}. ",
+      "Example (rounded to 3 decimal places):",
+      "  {2,4} -> [{ 2.000, { 2.000, 2.000}}, ",
+      "            { 3.464, {-0.928, 0.928}}, ",
+      "            { 6.000, { 2.785, 2.785}}, ",
+      "            {10.000, { 0.641, 0.641}}, ",
+      "            {10.392, {-0.354, 0.354}}]"]},
      {fifteen, 25, 15,
       ["A 4x4 array - a list of lists - contains the numbers 1 through 15 and ",
        "the atom 'x', shuffled in some order.",
@@ -443,6 +461,41 @@ gen_closest_fraction_problem(MinN, MaxN) ->
     {'$remember', {A,B}, Input}.
 
 %%%----------
+bounce() ->
+    #quest{generate=fun() -> X0 = (rnd_float()-0.5)*20,
+                             Y0 = rnd_float()*10 + abs(X0),
+                             {X0,Y0}
+                    end,
+           verify=fun({X0,Y0}, Answer) ->
+                          FoldFun =
+                              fun(_, false) -> false;
+                                 ({T,{X,Y}}, {T1,X1,Y1, VX1,VY1}) ->
+                                      T>T1
+                                          andalso
+                                          is_nearly_eq(Y, abs(X))
+                                          andalso
+                                          begin
+                                              {X2,Y2,VX2,VY2} = bounce_calc(X1, Y1, VX1, VY1, T-T1),
+                                              is_nearly_eq(X,X2) and                                                          is_nearly_eq(Y,Y2) andalso
+                                                  {T,X2,Y2,VX2,VY2}
+                                          end
+                              end,
+                          R = lists:foldl(FoldFun, {0, X0, Y0, 0, 0}, Answer),
+                          R /= false
+                  end}.
+
+bounce_calc(X1, Y1, VX1, VY1, DT) ->
+    X2 = X1 + DT*VX1,
+    Y2 = Y1 + DT*VY1 - 0.5*DT*DT,
+    VY2a = VY1 - DT,
+    if X2 > 0.0 ->
+            VX2 = VY2a, VY2 = VX1;
+       true ->
+            VX2 = -VY2a, VY2 = -VX1
+    end,
+    {X2, Y2, VX2, VY2}.
+
+%%%----------
 fifteen() ->
     #quest{generate=fun() -> make_fifteen(1) end,
            verify=fun verify_fifteen/2}.
@@ -588,6 +641,9 @@ gcd(A,0) -> A;
 gcd(A,B) -> gcd(B, A rem B).    % case A>B>0.
 
 %%%==================== Common predicates ==============================
+
+is_nearly_eq(X,Y) ->
+    abs(X-Y) < 1.0e-6 * max(abs(X), abs(Y)).
 
 is_impure_list(L) -> is_impure_list(L, 0).
 
