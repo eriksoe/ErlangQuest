@@ -114,12 +114,14 @@ quest_list() ->
       ["Given a list of coefficients [CN,C(N-1), ..., C1,C0] representing ",
        "the polynomium CN * X^n + C(N-1) * X^(N-1) + ... + C1 * X + C0, ",
        "answer with a root of the polynomium.",
+       "All roots are in [-100;100].",
        "Example:",
        "  [1.5, -4.5, 3] -> 2.0  (or 1.0)"]},
      {poly_roots, 25, 12,
       ["Given a list of coefficients [CN,C(N-1), ..., C1,C0] representing ",
        "the polynomium CN * X^N + C(N-1) * X^(N-1) + ... + C1 * X + C0, ",
-       "answer with a list of the N roots of the polynomium.",
+       "answer with a list of the roots of the polynomium.",
+       "There are N real roots, and all are in [-100;100].",
        "Example:",
        "  [1.5, -1.5, -3] -> [-1.0, 2.0]"]},
      {bounce, 25, 10,
@@ -478,7 +480,7 @@ poly_root() ->
                              {'$remember', Roots, Coeffs}
                     end,
            verify=fun({'$remember', Roots, _Coeffs}, Answer) ->
-                          lists:member(Answer, Roots)
+                          lists:any(fun(X)->is_nearly_eq(X,Answer) end, Roots)
                   end}.
 
 poly_roots() ->
