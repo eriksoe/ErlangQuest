@@ -110,6 +110,18 @@ quest_list() ->
        "If there is more than one answer, pick the one with lowest Denominator.",
        "Answer with the tuple {Enumerator,Denominator}.",
        "Example: {0.36, 6} -> {1,3}."]},
+     {poly_root, 20, 8,
+      ["Given a list of coefficients [CN,C(N-1), ..., C1,C0] representing ",
+       "the polynomium CN * X^n + C(N-1) * X^(N-1) + ... + C1 * X + C0, ",
+       "answer with a root of the polynomium.",
+       "Example:",
+       "  [1.5, -4.5, 3] -> 2.0  (or 1.0)"]},
+     {poly_roots, 25, 12,
+      ["Given a list of coefficients [CN,C(N-1), ..., C1,C0] representing ",
+       "the polynomium CN * X^N + C(N-1) * X^(N-1) + ... + C1 * X + C0, ",
+       "answer with a list of the N roots of the polynomium.",
+       "Example:",
+       "  [1.5, -1.5, -3] -> [-1.0, 2.0]"]},
      {bounce, 25, 10,
      ["A physics setup consists of a ball and two inclined planes.",
       "The planes are arranged in a V-shape as described by  Y=abs(X).",
@@ -461,6 +473,44 @@ gen_closest_fraction_problem(MinN, MaxN) ->
     {'$remember', {A,B}, Input}.
 
 %%%----------
+poly_root() ->
+    #quest{generate=fun() -> {Coeffs, Roots} = rnd_polynomium(8,15),
+                             {'$remember', Roots, Coeffs}
+                    end,
+           verify=fun({'$remember', Roots, _Coeffs}, Answer) ->
+                          lists:member(Answer, Roots)
+                  end}.
+
+poly_roots() ->
+    #quest{generate=fun() -> {Coeffs, Roots} = rnd_polynomium(8,15),
+                             {'$remember', Roots, Coeffs}
+                    end,
+           verify=fun({'$remember', Roots, _Coeffs}, Answer) ->
+                          lists:all(fun ({A,B}) -> is_nearly_eq(A,B) end,
+                                    lists:zip(lists:sort(Answer),
+                                              lists:sort(Roots)))
+                  end}.
+
+rnd_polynomium(MinDegree, MaxDegree) ->
+    N = rnd_integer(MinDegree, MaxDegree),
+    Roots = [(rnd_float()-0.5)*20.0
+             || _ <- lists:seq(1,N)],
+    HighCoeff = rnd_sign() * (0.5+4.5*rnd_float()),
+    Coeffs = lists:foldl(fun multiply_poly_with_X_minus_R/2,
+                         [HighCoeff],
+                         Roots),
+    {Coeffs, Roots}.
+
+multiply_poly_with_X_minus_R(R, Poly) ->
+    multiply_poly_with_X_minus_R(Poly, R, 0).
+
+multiply_poly_with_X_minus_R([], _R, Add) -> [Add];
+multiply_poly_with_X_minus_R([C | Rest], R, Add) ->
+    %%    (C*x^n + Rest) * (x-R) + Add*x^n+1
+    %% =  ((C+Add)*x^(n+1) + Rest * (x-R) - C*R*x^n
+    [C + Add | multiply_poly_with_X_minus_R(Rest, R, -C*R)].
+
+%%%----------
 bounce() ->
     #quest{generate=fun() -> X0 = (rnd_float()-0.5)*20,
                              Y0 = rnd_float()*10 + abs(X0),
@@ -712,6 +762,8 @@ rnd_integer(N) ->
 
 rnd_integer(Min,Max) -> % Inclusive.
     crypto:rand_uniform(Min, Max+1).
+
+rnd_sign() -> rnd_integer(0,1)*2-1.
 
 rnd_float() ->
     random:uniform().

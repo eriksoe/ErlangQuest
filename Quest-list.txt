@@ -60,6 +60,8 @@ Numerical problems:
 - (primality_check)
 - closest_fraction1
 - closest_fraction2
+- poly_root
+- poly_roots
 - bounce
 
 Interpretation:
