@@ -1,0 +1,31 @@
+                     Erlang Quest WEB SCOREBOARD
+
+HOW TO BUILD
+------------
+
+Go to the lib/quest_webboard/ directory and run
+
+   make compile
+
+Dependencies of note:
+
+- One indirect dependency is the C header file "uuid.h", which on
+  Ubuntu (and Debian?) is provided by the package "libossp-uuid-dev".
+
+HOW TO START
+------------
+
+Go to the lib/quest_webboard/ directory and run
+
+   make run
+
+This starts up Erlang Quest, the web scoreboard, and an Erlang
+interactive shell.
+
+The web board runs on port 8000 as default.
+
+HOW TO USE
+----------
+
+Point a web browser at http://localhost:8000/ .
+The scoreboard is updated dynamically.
