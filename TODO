@@ -1,24 +1,11 @@
 ==== TO DO
 
 - Quests:
-  Implementation:
-  - primality_check
-  Description:
-  - Quests involving spawning a process.
-  - receive_message
-  - send_message
-  - ping_from_new_process
-  - min_and_max_server
-  - leftmost_and_rightmost
-  - tree_paths          // {{a,b},{a,c}} -> [{a,[[l,l],[r,l]]}, {b,[[l,r]]}, {c,[[r,r]]}]
-  - tree_builder
-  - tree_builder_server
-  - add_calculator      // ["1+2+3", "9  +10+1+0"] -> [6,20]
-  - simple_calculator	// ["1 + 2", "3*  4"] -> [3,12]
-
+  See Quest-list.txt.
 
 - Expiry of active challenges
 - Hint system?
+- Campaign/trail system?
 - An (optional) explanation on incorrect_answer results.
 
 ==== DONE

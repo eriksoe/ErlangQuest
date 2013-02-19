@@ -69,7 +69,9 @@ quest_list() ->
        "Example: \"Hello!\" -> \"Uryyb!\""]},
      {word_count,        15, 7,
       "Given a string, return with the number of words (stretches of A-Z/a-z) it contains."},
-     {primality_check,   20, 7, "Given a list of integers, answer with a list of booleans indicating whether the corresponding number is a prime."},
+     {primality_check,   20, 7,
+      ["Given a list of integers, answer with a list of booleans indicating",
+       "whether the corresponding number is a prime."]},
      {add_calculator,    20, 9,
       ["Given a string containing a simple addition expression of the form ",
        "\"A + B\", where A and B are integers, calculate the sum.",
@@ -361,6 +363,26 @@ word_count() ->
                     end,
            verify=fun({'$remember', N, _}, Answer) -> Answer=:=N end}.
 
+primality_check() ->
+    #quest{generate=fun() ->
+                            L1 = [rnd_integer(2,1000000) || _ <- lists:seq(1,80)],
+                            [X || X <- L1,
+                                  (not is_shallow_prime(X) orelse
+                                   rnd_float() < 0.5)]
+                    end,
+           verify=fun(Input,Answer) ->
+                          Primality = [is_prime(X) || X <- Input],
+                          Answer =:= Primality
+                  end}.
+
+is_shallow_prime(X) ->
+    (X rem 2 =:= 0 orelse
+     X rem 3 =:= 0 orelse
+     X rem 5 =:= 0).
+
+is_prime(X) -> is_prime(X,2).
+is_prime(X, D) when D*D>X ->true;
+is_prime(X, D) -> X rem D /= 0 andalso is_prime(X, D+1).
 
 %%%---------- Calculators:
 add_calculator() ->
@@ -691,6 +713,13 @@ gcd(A,B) when B>A -> gcd(B,A);  % Keep A largest.
 gcd(A,B) when B<0 -> gcd(A,-B); % Keep B non-negative.
 gcd(A,0) -> A;
 gcd(A,B) -> gcd(B, A rem B).    % case A>B>0.
+
+fold_int_range(Fun, Acc, Min, Max) when is_function(Fun,2),
+                                        is_integer(Min),
+                                        is_integer(Max) ->
+    if Min > Max -> Acc;
+       true      -> fold_int_range(Fun, Fun(Min,Acc), Min+1, Max)
+    end.
 
 %%%==================== Common predicates ==============================
 

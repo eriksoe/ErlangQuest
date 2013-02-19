@@ -27,7 +27,7 @@ List handling:
 
 Tree handling:
 - (leftmost_and_rightmost)
-- (tree_paths)
+- (tree_paths)          // {{a,b},{a,c}} -> [{a,[[l,l],[r,l]]}, {b,[[l,r]]}, {c,[[r,r]]}]
 - (tree_builder)
 - (tree_builder_server)
 
@@ -43,7 +43,7 @@ String parsing:
 - (word_count2)          // "This is a sentence, is it not?" -> [{"this",1},{"is",2}, {not,1}, ...]
 - add_calculator
 - (add_calculator2)     // "1 + 23 + 456" -> 480
-- (simple_calculator)
+- (simple_calculator)	// ["1 + 2", "3*  4"] -> [3,12]
 - postfix_calculator
 - lisp_calculator
 
@@ -57,7 +57,7 @@ Bit processing:
 - (one_bits_in_integer)
 
 Numerical problems:
-- (primality_check)
+- primality_check
 - closest_fraction1
 - closest_fraction2
 - poly_root
