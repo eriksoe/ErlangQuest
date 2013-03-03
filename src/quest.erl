@@ -43,6 +43,10 @@ help_text() ->
         "      Is equivalent to:\n"++
         "        {CID,Input}=quest:get_challenge(Username, QuestID),\n"++
         "        quest:answer_challenge(CID,SolutionFun(Input))\n"++
+        "  * quests:submit(QuestID, SolutionModule) -- giving the solution fun via\n"++
+        "      a module.\n"++
+        "      SolutionModule should contain an exported function named QuestID\n"++
+        "      prepended with 'quest_'. Fx: quest_any_answer(Input)\n"++
         "  * quests:submit(QuestID, SolutionFun) -- using the default user.\n"++
         "\n"++
         "Each quest has two levels: slow and fast.  You get points the first time you\n"++
@@ -101,9 +105,12 @@ get_challenge(Username, QuestID) when is_atom(Username), is_atom(QuestID) ->
 answer_challenge(ChallengeID, Answer) ->
     gen_server:call(?SERVER, {answer_challenge, ChallengeID, Answer}).
 
-submit(QuestID, SolutionFun) ->
-    call_with_default_username(fun(Username) -> submit(Username, QuestID, SolutionFun) end).
+submit(QuestID, SolutionFunOrMod) ->
+    call_with_default_username(fun(Username) -> submit(Username, QuestID, SolutionFunOrMod) end).
 
+submit(Username, QuestID, SolutionModule) when is_atom(SolutionModule) ->
+    FunName = list_to_atom("quest_"++atom_to_list(QuestID)),
+    submit(Username, QuestID, fun(Input) -> SolutionModule:FunName(Input) end);
 submit(Username, QuestID, SolutionFun) when is_atom(Username),
                                             is_atom(QuestID),
                                             is_function(SolutionFun,1) ->
