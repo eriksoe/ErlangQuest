@@ -1,7 +1,7 @@
 -module(quest).
 
 -export([help/0,
-         list/0, list/1,
+         list/0, list/1, list/2,
          score/0, score/1,
          describe_quest/1,
          get_challenge/1, get_challenge/2,
@@ -20,8 +20,12 @@ help_text() ->
 	"\n"++
         "  * quest:set_user(Username) -- sets the default username.\n"++
 	"\n"++
-        "  * quest:list(Username) -- shows the quests currently available to you.\n"++
-        "  * quest:list() -- using the default user.\n"++
+        "  * quest:list(Username, Options) -- shows available quests.\n"++
+        "       If Options is [] only undone quest is listed\n"++
+        "                     [all] every available quest is listed.\n"++
+        "  * quest:list(Username) -- only undone quest.\n"++
+        "  * quest:list(Options) -- control output for default user.\n"++
+        "  * quest:list() -- undone quests for the default user.\n"++
 	"\n"++
         "  * quest:score(Username) -- shows your accomplishments so far.\n"++
         "  * quest:score() -- using the default user.\n"++
@@ -58,14 +62,26 @@ help() ->
     io:format("~s", [help_text()]).
 
 list() ->
-    call_with_default_username(fun(Username) -> list(Username) end).
+    call_with_default_username(fun(Username) -> list(Username, []) end).
 
+list(Options) when is_list(Options) ->
+    call_with_default_username(fun(Username) -> list(Username, Options) end);
 list(Username) when is_atom(Username) ->
-    Quests = gen_server:call(?SERVER, {list, Username}),
+    list(Username, []).
+
+list(Username, Options) when is_atom(Username), is_list(Options) ->
+    Quests0 = gen_server:call(?SERVER, {list, Username}),
+    %% Maybe remove quests already completed
+    Quests  = case lists:member(all, Options) of
+		  false ->
+		      [Q || Q={_,_,_,Status} <- Quests0, Status == undone];
+		  true ->
+		      Quests0
+	      end,
     io:format("Quests currently available to ~s:\n", [Username]),
-    io:format("---Pts--Quest-----------\n"),
-    lists:foreach(fun({Q,P}) -> io:format("  ~4b  ~s\n", [P,Q]) end,
-                  Quests).
+    io:format("---Quest---------------------------Variant-----Ptr--------\n"),
+    lists:foreach(fun({Q,V,P,S}) -> io:format(" ~s ~-30s ~5s    ~5b\n", [case S of done -> "*"; _ -> " " end, Q,V,P]) end,
+                  lists:keysort(3, Quests)).
 
 score() ->
     call_with_default_username(fun(Username) -> score(Username) end).

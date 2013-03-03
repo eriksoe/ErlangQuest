@@ -122,11 +122,26 @@ gen_challenge_id() ->
     <<ID:64>> = crypto:rand_bytes(8),
     ID.
 
-quests_available_to_user(Username, State) ->
+quests_available_to_user(Username, #state{user_achievements=AchTab}=State) ->
     Score = get_user_score(Username, State),
-    [{QuestID,PointsWorth}
-     || {QuestID, LevelRequired, PointsWorth,_Description} <- quest_list(),
-        Score >= LevelRequired].
+    Quests = [{QuestID,PointsWorth}
+	      || {QuestID, LevelRequired, PointsWorth,_Description} <- quest_list(),
+		 Score >= LevelRequired],
+    %% Decorate quest-list with status (done/undone) and Variant
+    lists:concat(
+      lists:map(fun({QuestID, PointsWorth}) ->
+			[{QuestID, slow, PointsWorth, quest_status(Username, QuestID, slow, AchTab)},
+			 {QuestID, fast, PointsWorth, quest_status(Username, QuestID, fast, AchTab)}]
+		end,
+		Quests)).
+
+quest_status(Username, QuestID, Variant, AchTab) ->
+    case ets:lookup(AchTab, {Username,QuestID,Variant}) of
+	[] ->
+	    undone;
+	[_] ->
+	    done
+    end.
 
 get_user_achievements(Username, State) ->
     %% TODO: Add achievement list.
