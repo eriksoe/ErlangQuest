@@ -8,12 +8,12 @@ Erlang Quest is a way to practise Erlang -- writing and problem
 solving in Erlang.
 
 It does not include tutorials in the syntax etc. of Erlang -- there
-are plenty of introductory material freely available on the
-internet. [1] [2] [3] Nor does it do much in the way of teaching the
-standard libraries, [4] [5] expect for giving hints about how tasks can
-be solved (the hint system is not there yet, though).  However, it can
-be used for practising, to learn how to use the standard libraries in
-practical problem solving.
+are plenty of introductory material freely available on the internet
+([1][], [2][], [3][]) Nor does it do much in the way of teaching the
+standard libraries ([4][] [5][]), expect for giving hints about how
+tasks can be solved (the hint system is not there yet, though).
+However, it can be used for practising, to learn how to use the
+standard libraries in practical problem solving.
 
 How to use
 ----------
