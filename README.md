@@ -10,33 +10,40 @@ solving in Erlang.
 It does not include tutorials in the syntax etc. of Erlang -- there
 are plenty of introductory material freely available on the internet
 ([1][], [2][], [3][]) Nor does it do much in the way of teaching the
-standard libraries ([4][] [5][]), expect for giving hints about how
+standard libraries ([4][], [5][]), expect for giving hints about how
 tasks can be solved (the hint system is not there yet, though).
 However, it can be used for practising, to learn how to use the
 standard libraries in practical problem solving.
 
+
 How to use
 ----------
 
-The Quest game can be played in two ways: you can play it by yourself,
-or it can be played by many player at once, each trying to solve the
-problems and gain points.
+The Quest game can be played in two ways: you can play it by yourself
+(_single-user mode_), or it can be played by many player at once, each
+trying to solve the problems and gain points (_multi-user mode_).
 
 The latter can be used as part of for course-like settings; each
 participant can then progress in their own pace.
 
-In either case, a Quest server is started, the player(s) connect to
-it, pick a user name, and the game can begin.
 
-The short version is:
+Quick start _single-user mode_
+------------------------------
+      make start-server
+      > quest:help().
 
+For more information go to the 'How to Play' section.
+
+
+Quick start _multi-user mode_
+-----------------------------
     Server:
       MY_IP=... make start-server
     Player:
       MY_IP=... SERVER_IP=... make start-client
       > quest:help().
 
-See below for the longer version.
+See right below for more details.
 
 
 How to set up the server
@@ -73,6 +80,7 @@ Alternatively, start an Erlang shell of your own with the parameters
 
 then connect to the server nodes thus:
     net_adm:ping('quests@insert-the-server-IP').
+
 
 How to play
 -----------
@@ -136,7 +144,6 @@ Only the "quest" module is needed by the players.  For multi-player
 use, it is sufficient to distribute that module, as well as an easy
 way to start a client node (like the "start-client" Makefile target).
 
-----------
 [1]: http://www.erlang.org/doc/getting_started/users_guide.html
 [2]: http://learnyousomeerlang.com/
 [3]: http://www.erlang.org/course/course.html
