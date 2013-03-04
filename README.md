@@ -16,8 +16,8 @@ However, it can be used for practising, to learn how to use the
 standard libraries in practical problem solving.
 
 Questions, feedback, and general discussions will be very much
-appreciated.  You can either use GitHub issues, or post on the Erlang
-Quest [Google Group](https://groups.google.com/forum/?hl=en&fromgroups#!forum/erlang-quest).
+appreciated.  You can either use GitHub issues, or post on the [Erlang
+Quest google group](https://groups.google.com/forum/?hl=en&fromgroups#!forum/erlang-quest).
 
 
 How to use
