@@ -24,23 +24,23 @@ How to use
 ----------
 
 The Quest game can be played in two ways: you can play it by yourself
-(_single-user mode_), or it can be played by many player at once, each
-trying to solve the problems and gain points (_multi-user mode_).
+(single-user mode), or it can be played by many player at once, each
+trying to solve the problems and gain points (multi-user mode).
 
 The latter can be used as part of for course-like settings; each
 participant can then progress in their own pace.
 
 
-Quick start _single-user mode_
-------------------------------
+Quick start single-user mode
+----------------------------
       make start-server
       > quest:help().
 
 For more information go to the 'How to Play' section.
 
 
-Quick start _multi-user mode_
------------------------------
+Quick start multi-user mode
+---------------------------
     Server:
       MY_IP=... make start-server
     Player:
