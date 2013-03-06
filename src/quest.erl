@@ -87,7 +87,7 @@ list(Username, Options) when is_atom(Username), is_list(Options) ->
 			  io:format(" ~2s ~-30s ~8s     slow(50%), fast(50%)\n",
 				    [completion_label(S,F),ID,point_label(P,S,F)])
 		  end,
-                  lists:keysort(3, Quests)).
+                  lists:keysort(2, Quests)).
 
 quest_incomplete(Slow, Fast) ->
     Slow == 0 orelse Fast == 0.
