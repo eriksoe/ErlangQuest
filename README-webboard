@@ -24,6 +24,11 @@ interactive shell.
 
 The web board runs on port 8000 as default.
 
+Note: if you want to connect to Erlang Quest remotely, run like this
+
+   MY_IP=... make run
+      
+
 HOW TO USE
 ----------
 
