@@ -82,10 +82,10 @@ list(Username, Options) when is_atom(Username), is_list(Options) ->
 		      Quests0
 	      end,
     io:format("Quests currently available to ~s:\n", [Username]),
-    io:format("----Quest----------------------------Points-----Variants------------\n"),
+    io:format("----Quest----------------------------Points------Variants------------\n"),
     lists:foreach(fun({ID,P,S,F}) ->
-			  io:format(" ~2s ~-30s ~8s     slow(50%), fast(50%)\n",
-				    [completion_label(S,F),ID,point_label(P,S,F)])
+			  io:format(" ~2s ~-30s ~8s     ~1sslow(50%), ~1sfast(50%)\n",
+				    [completion_label(S,F),ID,point_label(P,S,F), variant_bullet(S), variant_bullet(F)])
 		  end,
                   lists:keysort(2, Quests)).
 
@@ -109,6 +109,14 @@ completion_label(S,F) ->
 	    "*";
 	{false, true} ->
 	    "**"
+    end.
+
+variant_bullet(V) ->
+    case V > 0 of
+	true ->
+	    "*";
+	false ->
+	    ""
     end.
 
 quest_not_started(Slow, Fast) ->
