@@ -72,25 +72,28 @@ list(Username) when is_atom(Username) ->
     list(Username, []).
 
 list(Username, Options) when is_atom(Username), is_list(Options) ->
-    Quests0 = gen_server:call(?SERVER, {list, Username}),
-    %% Maybe remove quests already completed
-    Quests  = case lists:member(all, Options) of
-		  false ->
-		      [Q || Q={_QuestID, _PointsWorth, SlowPoints, FastPoints} <- Quests0,
-			    quest_incomplete(SlowPoints, FastPoints)];
-		  true ->
-		      Quests0
-	      end,
+    Quests = gen_server:call(?SERVER, {list, Username}),
     io:format("Quests currently available to ~s:\n", [Username]),
     io:format("----Quest----------------------------Points------Variants------------\n"),
-    lists:foreach(fun({ID,P,S,F}) ->
-			  io:format(" ~2s ~-30s ~8s     ~1sslow(50%), ~1sfast(50%)\n",
-				    [completion_label(S,F),ID,point_label(P,S,F), variant_bullet(S), variant_bullet(F)])
-		  end,
-                  lists:keysort(2, Quests)).
+    lists:foreach(fun display_quest_line/1, extract_quests_to_display(Quests, Options)).
 
-quest_incomplete(Slow, Fast) ->
-    Slow == 0 orelse Fast == 0.
+extract_quests_to_display(Quests, Options) ->
+    Qs = case lists:member(all, Options) of
+	     false ->
+		 [Q || Q={_QuestID, _PointsWorth, SlowPoints, FastPoints} <- Quests,
+		       quest_in_progress(SlowPoints, FastPoints)];
+	     true ->
+		 Quests
+	 end,
+    lists:keysort(2, Qs).
+
+display_quest_line({QuestID, PointsWorth, SlowPoint, FastPoints}) ->
+    io:format(" ~2s ~-30s ~8s     ~1sslow(50%), ~1sfast(50%)\n",
+	      [completion_label(SlowPoint,FastPoints),
+	       QuestID,
+	       point_label(PointsWorth,SlowPoint,FastPoints),
+	       variant_bullet(SlowPoint),
+	       variant_bullet(FastPoints)]).
 
 point_label(P,S,F) ->
     P2 = P+P,
@@ -119,11 +122,9 @@ variant_bullet(V) ->
 	    ""
     end.
 
-quest_not_started(Slow, Fast) ->
-    Slow == 0 andalso Fast == 0.
-
-quest_completed(Slow, Fast) ->
-    Slow > 0 andalso Fast > 0.
+quest_not_started(Slow, Fast) -> Slow == 0 andalso Fast == 0.
+quest_in_progress(Slow, Fast) -> Slow == 0 orelse  Fast == 0.
+quest_completed  (Slow, Fast) -> Slow  > 0 andalso Fast  > 0.
 
 %%% Score %%%%%%%%%%%%
 
