@@ -128,19 +128,20 @@ quests_available_to_user(Username, #state{user_achievements=AchTab}=State) ->
 	      || {QuestID, LevelRequired, PointsWorth,_Description} <- quest_list(),
 		 Score >= LevelRequired],
     %% Decorate quest-list with status (done/undone) and Variant
-    lists:concat(
-      lists:map(fun({QuestID, PointsWorth}) ->
-			[{QuestID, slow, PointsWorth, quest_status(Username, QuestID, slow, AchTab)},
-			 {QuestID, fast, PointsWorth, quest_status(Username, QuestID, fast, AchTab)}]
-		end,
-		Quests)).
+    lists:map(fun({QuestID, PointsWorth}) ->
+		      {QuestID,
+		       PointsWorth,
+		       quest_points(Username, QuestID, slow, AchTab),
+		       quest_points(Username, QuestID, fast, AchTab)}
+	      end,
+	      Quests).
 
-quest_status(Username, QuestID, Variant, AchTab) ->
+quest_points(Username, QuestID, Variant, AchTab) ->
     case ets:lookup(AchTab, {Username,QuestID,Variant}) of
 	[] ->
-	    undone;
-	[_] ->
-	    done
+	    0;
+	[#user_achievement{points_awarded=Points}] ->
+	    Points
     end.
 
 get_user_achievements(Username, State) ->

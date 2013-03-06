@@ -61,6 +61,8 @@ help_text() ->
 help() ->
     io:format("~s", [help_text()]).
 
+%%% List %%%%%%%%%%%%
+
 list() ->
     call_with_default_username(fun(Username) -> list(Username, []) end).
 
@@ -74,20 +76,56 @@ list(Username, Options) when is_atom(Username), is_list(Options) ->
     %% Maybe remove quests already completed
     Quests  = case lists:member(all, Options) of
 		  false ->
-		      [Q || Q={_,_,_,Status} <- Quests0, Status == undone];
+		      [Q || Q={_QuestID, _PointsWorth, SlowPoints, FastPoints} <- Quests0,
+			    quest_incomplete(SlowPoints, FastPoints)];
 		  true ->
 		      Quests0
 	      end,
     io:format("Quests currently available to ~s:\n", [Username]),
-    io:format("---Quest---------------------------Variant-----Ptr--------\n"),
-    lists:foreach(fun({Q,V,P,S}) -> io:format(" ~s ~-30s ~5s    ~5b\n", [case S of done -> "*"; _ -> " " end, Q,V,P]) end,
+    io:format("----Quest----------------------------Points-----Variants------------\n"),
+    lists:foreach(fun({ID,P,S,F}) ->
+			  io:format(" ~2s ~-30s ~8s     slow(50%), fast(50%)\n",
+				    [completion_label(S,F),ID,point_label(P,S,F)])
+		  end,
                   lists:keysort(3, Quests)).
+
+quest_incomplete(Slow, Fast) ->
+    Slow == 0 orelse Fast == 0.
+
+point_label(P,S,F) ->
+    P2 = P+P,
+    case S+F of
+	P2 ->
+	    io_lib:format("~p", [P2]);
+	Sum ->
+	    io_lib:format("~p/~p", [Sum, P2])
+    end.
+
+completion_label(S,F) ->
+    case {quest_not_started(S,F), quest_completed(S,F)} of
+	{true, _} ->
+	    "";
+	{false, false} ->
+	    "*";
+	{false, true} ->
+	    "**"
+    end.
+
+quest_not_started(Slow, Fast) ->
+    Slow == 0 andalso Fast == 0.
+
+quest_completed(Slow, Fast) ->
+    Slow > 0 andalso Fast > 0.
+
+%%% Score %%%%%%%%%%%%
 
 score() ->
     call_with_default_username(fun(Username) -> score(Username) end).
 
 score(Username) when is_atom(Username) ->
     gen_server:call(?SERVER, {score, Username}).
+
+%%% Describe quest %%%%%%%%%%%%
 
 describe_quest(QuestID) ->
     case gen_server:call(?SERVER, {describe_quest, QuestID}) of
@@ -112,14 +150,20 @@ print_quest_description(L) ->
                   L),
     ok.
 
+%%% Get Challenge %%%%%%%%%%%%
+
 get_challenge(QuestID) ->
     call_with_default_username(fun(Username) -> get_challenge(Username, QuestID) end).
 
 get_challenge(Username, QuestID) when is_atom(Username), is_atom(QuestID) ->
     gen_server:call(?SERVER, {get_challenge, Username, QuestID}).
 
+%%% Answer Challenge %%%%%%%%%%%%
+
 answer_challenge(ChallengeID, Answer) ->
     gen_server:call(?SERVER, {answer_challenge, ChallengeID, Answer}).
+
+%%% Submit %%%%%%%%%%%%
 
 submit(QuestID, SolutionFunOrMod) ->
     call_with_default_username(fun(Username) -> submit(Username, QuestID, SolutionFunOrMod) end).
@@ -136,9 +180,13 @@ submit(Username, QuestID, SolutionFun) when is_atom(Username),
             quest:answer_challenge(ChallengeID, SolutionFun(Input))
     end.
 
+%%% Set user %%%%%%%%%%%%
+
 set_user(Username) ->
     put(?DEFAULT_USERNAME, Username),
     ok.
+
+%%% Utils %%%%%%%%%
 
 call_with_default_username(Continuation) ->
     case get(?DEFAULT_USERNAME) of
