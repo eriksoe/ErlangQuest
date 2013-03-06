@@ -148,7 +148,7 @@ After the first couple of quests it might be easier having quest
 solutions in a module, instead of typing them in the shell.
 
 One way to do this is adding quest solutions to the module
-in the current directory (eq_solutions) and then do this:
+in the current directory and then do this:
 
     (quests@127.0.0.1)90> c(eq_solutions).
     {ok,eq_solutions}
@@ -156,12 +156,12 @@ in the current directory (eq_solutions) and then do this:
     {correct_but_nothing_unlocked,[{time,0}]}
 
 Note, in the example above, quest:submit calls the function
-quest_base_7/1, so 'quest_' prefixed with quest name.
+eq_solutions:quest_base_7/1, so 'quest_' prefixed with quest name.
 
 Another way (mostly if solutions exists in more than one module) is to
 use Emake.  Create an Emakefile:
 
-    pmm@budda:~/projects/ErlangQuest$ cat Emakefile 
+    pmm@budda:~/projects/ErlangQuest$ cat Emakefile
     {"eq_solutions.erl", [debug_info]}.
 
 and then run the following from the shell:
@@ -169,7 +169,7 @@ and then run the following from the shell:
     (quests@127.0.0.1)93> make:all([load]).
     Recompile: eq_solutions
 
-You can read more on Emake [here:](http://www.erlang.org/doc/man/make.html).
+You can read more on Emake [here](http://www.erlang.org/doc/man/make.html).
 
 
 Technical stuff
