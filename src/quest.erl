@@ -126,7 +126,7 @@ submit(QuestID, SolutionFunOrMod) ->
 
 submit(Username, QuestID, SolutionModule) when is_atom(SolutionModule) ->
     FunName = list_to_atom("quest_"++atom_to_list(QuestID)),
-    submit(Username, QuestID, fun(Input) -> SolutionModule:FunName(Input) end);
+    submit(Username, QuestID, fun SolutionModule:FunName/1);
 submit(Username, QuestID, SolutionFun) when is_atom(Username),
                                             is_atom(QuestID),
                                             is_function(SolutionFun,1) ->
