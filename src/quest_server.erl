@@ -283,13 +283,13 @@ restore_loop(Ref, State, N) ->
                 live ->
                     restore_loop(Ref, State, N); % Keep reading to eof.
                 {error, Reason} ->
-                    error({unable_to_restore_state, Reason});
+                    erlang:error({unable_to_restore_state, Reason});
                 {log_item, {TS,Item}} ->
                     replay_event(TS, Item, State),
                     restore_loop(Ref, State, N+1)
             end
     after 5000 ->
-            error({timeout_while_restoring_state})
+            erlang:error({timeout_while_restoring_state})
     end.
 
 replay_event(_TS, {achieved, Username, QuestID, Achieved}, State) ->
