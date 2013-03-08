@@ -178,7 +178,8 @@ quest_list() ->
        "  [\"x xx \",",
        "   \"x    \",",
        "   \"xx xx\"]   -> [{2,1}, {2,2}, {3,2}, {3,3}}]"
-      ]}
+      ]},
+     {hack_the_server, 30, 30, "Answer correctly."}
     ].
 
 any_answer() ->
@@ -702,6 +703,12 @@ labyrinth_freeset_to_array(FreeSet, XMax, YMax) ->
       end
       || X <- lists:seq(1,XMax)]
      || Y <- lists:seq(1,YMax)].
+
+hack_the_server() ->
+    #quest{generate=fun() -> {'$remember', semi_bignum(), 'no_hint'} end,
+           verify=fun({'$remember', Unexpected, _}, Answer) ->
+                          Answer =:= Unexpected
+                  end}.
 
 %%%==================== Common list functions ==============================
 allzipwith(Fun, L1, L2) when is_function(Fun,2), is_list(L1), is_list(L2) ->
