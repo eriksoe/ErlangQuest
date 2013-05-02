@@ -180,10 +180,12 @@ quest_list() ->
        "   \"xx xx\"]   -> [{2,1}, {2,2}, {3,2}, {3,3}}]"
       ]},
      {hack_the_server, 30, 30, "Answer correctly."},
-     {send_any_message, 5, 2, ["Given {Token,PID}, send a message {Token,X} to PID "
-                           "for any X.  Reply with any value."]},
-     {send_and_receive, 5, 2, ["Given {Token,PID,A}, send a message {Token,{self(),A}} to PID, "
-                               "then receive {A,B} and use B as the answer."]}
+     {send_any_message, 5, 2,
+      ["Given {Token,PID}, send a message {Token,X} to PID for any X.",
+       "Reply with any value."]},
+     {send_and_receive, 5, 4,
+      ["Given {Token,{PID,A}}, send a message {Token,{self(),A}} to PID, ",
+       "then receive {A,B} and use B as the answer."]}
     ].
 
 any_answer() ->

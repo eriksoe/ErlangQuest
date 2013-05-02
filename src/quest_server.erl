@@ -244,8 +244,6 @@ process_input_specials(_, I) ->
 
 read_and_shutdown_interlocutor(Token, {'$interlocutor', {_Fun, _InitialState}, I}) ->
     ReadIState = quest_interlocutor:read_state(Token),
-    error_logger:info_msg("~s: Read istate for ~p: ~p\n",
-                          [?MODULE, Token, ReadIState]),
     quest_interlocutor:forget(Token),
     case ReadIState of
         {ok, IState} ->
