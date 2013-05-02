@@ -179,7 +179,11 @@ quest_list() ->
        "   \"x    \",",
        "   \"xx xx\"]   -> [{2,1}, {2,2}, {3,2}, {3,3}}]"
       ]},
-     {hack_the_server, 30, 30, "Answer correctly."}
+     {hack_the_server, 30, 30, "Answer correctly."},
+     {send_any_message, 5, 2, ["Given {Token,PID}, send a message {Token,X} to PID "
+                           "for any X.  Reply with any value."]},
+     {send_and_receive, 5, 2, ["Given {Token,PID,A}, send a message {Token,{self(),A}} to PID, "
+                               "then receive {A,B} and use B as the answer."]}
     ].
 
 any_answer() ->
@@ -710,6 +714,33 @@ hack_the_server() ->
                           Answer =:= Unexpected
                   end}.
 
+%%%---------- Quests involving processes:
+send_any_message() ->
+    #quest{generate=fun() -> {'$interlocutor', {fun(_,no) -> yes;
+                                                   (_,_) -> bad
+                                                end , no},
+                              whereis(quest_interlocutor)}
+                    end,
+           verify=fun({'$interlocutor_result', IState, _}, _) ->
+                          IState=:=yes
+                  end}.
+
+send_and_receive() ->
+    #quest{generate=fun() ->
+                            Secret1 = rnd_binary(8),
+                            Secret2 = rnd_binary(8),
+                            {'$interlocutor', {fun({Caller,In},no) when In==Secret1 ->
+                                                       Caller ! {Secret1,Secret2},
+                                                       yes;
+                                                  (_,_) -> bad
+                                               end, no},
+                             {'$remember', Secret2,
+                              {whereis(quest_interlocutor), Secret1}}}
+                    end,
+           verify=fun({'$interlocutor_result', IState, {'$remember',Secret2, _}}, Answer) ->
+                          IState=:=yes andalso Answer =:= Secret2
+                  end}.
+
 %%%==================== Common list functions ==============================
 allzipwith(Fun, L1, L2) when is_function(Fun,2), is_list(L1), is_list(L2) ->
     lists:all(fun({A,B}) -> Fun(A,B) end,
@@ -848,6 +879,9 @@ rnd_atom() ->
 
 rnd_binary() ->
     crypto:rand_bytes(rnd_integer(0,20)).
+
+rnd_binary(N) ->
+    crypto:rand_bytes(N).
 
 char_atom() ->
     list_to_atom([$a + rnd_integer(26)-1]).

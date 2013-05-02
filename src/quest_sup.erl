@@ -27,6 +27,7 @@ init([]) ->
     {ok, { {one_for_all, 5, 10},
            [
             ?CHILD(quest_log,worker),
-            ?CHILD(quest_server,worker)
+            ?CHILD(quest_server,worker),
+            ?CHILD(quest_interlocutor,worker)
            ]} }.
 

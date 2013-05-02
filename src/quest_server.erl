@@ -180,7 +180,8 @@ answer_challenge(ChallengeID, Answer, State=#state{active_challenges=ACTab}) ->
                            issued=TS0}] ->
             ets:delete(ACTab, ChallengeID),
             #quest{verify=VerifyFun} = quest_functions(QuestID),
-            case VerifyFun(Input, Answer) of
+            Input2 = read_and_shutdown_interlocutor(ChallengeID, Input),
+            case VerifyFun(Input2, Answer) of
                 true ->
                     Elapsed = timer:now_diff(TS1,TS0) div 1000,
                     answered_correctly(Username, QuestID, Elapsed, State);
@@ -230,11 +231,32 @@ make_challenge(Quest, Username, #state{active_challenges = ACTab}) ->
                                         quest=QuestID,
                                         input = ChallengeSpec,
                                         issued=now()}),
-    Input = case ChallengeSpec of
-                {'$remember', _, I} -> I;
-                I -> I
-            end,
+    Input = process_input_specials(ChallengeID, ChallengeSpec),
     {ChallengeID, Input}.
+
+
+%% Setup interlocutor is necessary; strip '$remember' if necessary.
+process_input_specials(Token, {'$interlocutor', {Fun, InitialState}, I}) ->
+    quest_interlocutor:add(Token, Fun, InitialState),
+    {Token,strip_remember(I)};
+process_input_specials(_, I) ->
+    strip_remember(I).
+
+read_and_shutdown_interlocutor(Token, {'$interlocutor', {_Fun, _InitialState}, I}) ->
+    ReadIState = quest_interlocutor:read_state(Token),
+    error_logger:info_msg("~s: Read istate for ~p: ~p\n",
+                          [?MODULE, Token, ReadIState]),
+    quest_interlocutor:forget(Token),
+    case ReadIState of
+        {ok, IState} ->
+            {'$interlocutor_result', IState, I};
+        {error, not_found} ->
+            {'$interlocutor_no_result', I}
+    end;
+read_and_shutdown_interlocutor(_, I) -> I.
+
+strip_remember({'$remember', _, I}) -> I;
+strip_remember(I) -> I.
 
 %%%===================================================================
 %%% Quests
