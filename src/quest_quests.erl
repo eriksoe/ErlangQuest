@@ -185,7 +185,11 @@ quest_list() ->
        "Reply with any value."]},
      {send_and_receive, 5, 4,
       ["Given {Token,{PID,A}}, send a message {Token,{self(),A}} to PID, ",
-       "then receive {A,B} and use B as the answer."]}
+       "then receive {A,B} and use B as the answer."]},
+     {spawn_a_helper, 8, 5,
+      ["Given {Token,PID}, send from one process {Token,{self(),tell_me}} to PID, ",
+       "and receive the response Secret1. Do the same from a different process "
+       "to obtain Secret2. Answer with a list of the two secrets (in any order)."]}
     ].
 
 any_answer() ->
@@ -741,6 +745,26 @@ send_and_receive() ->
                     end,
            verify=fun({'$interlocutor_result', IState, {'$remember',Secret2, _}}, Answer) ->
                           IState=:=yes andalso Answer =:= Secret2
+                  end}.
+
+spawn_a_helper() ->
+    #quest{generate=fun() ->
+                            Secret1 = rnd_binary(8),
+                            Secret2 = rnd_binary(8),
+                            {'$interlocutor', {fun({Caller1,tell_me},a) ->
+                                                       Caller1 ! Secret1,
+                                                       {b,Caller1};
+                                                  ({Caller2,tell_me},{b,Caller1}) when Caller2 /= Caller1 ->
+                                                       Caller2 ! Secret2,
+                                                       ok;
+                                                       (_,_) -> bad
+                                               end, a},
+                             {'$remember', [Secret1,Secret2],
+                              whereis(quest_interlocutor)}}
+                    end,
+           verify=fun({'$interlocutor_result', IState, {'$remember',Secrets, _}}, Answer) ->
+                          IState=:=ok andalso
+                              lists:sort(Answer) =:= lists:sort(Secrets)
                   end}.
 
 %%%==================== Common list functions ==============================

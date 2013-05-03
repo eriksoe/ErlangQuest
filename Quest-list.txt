@@ -49,9 +49,9 @@ String parsing:
 
 
 Processes:
-- (receive_message)
-- (send_message)
-- (ping_from_new_process)
+- send_any_message
+- send_and_receive
+- spawn_a_helper
 
 Bit processing:
 - (one_bits_in_integer)
