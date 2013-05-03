@@ -154,6 +154,8 @@ handle_request('GET', [], Req) ->
     Req:file(www_filepath("index.html"));
 handle_request('GET', ["quest_webboard.js"=F], Req) ->
     Req:file(www_filepath(F));
+handle_request('GET', ["jquery.min.js"=F], Req) ->
+    Req:file(www_filepath(F));
 handle_request(Method, [Path], Req) ->
     case re:run(Path, "[A-Za-z0-9_]*\.(png|jpg)", [{capture,none}]) of
         match ->
