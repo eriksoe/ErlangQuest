@@ -14,7 +14,7 @@ quest_list() ->
      {any_reference,      1, 1, "Answer with a value of type reference."},
      {answer_the_input,   1, 1, "Answer with the input given in the challenge."},
      {list_of_length_10,  2, 1, "Answer with any list of length 10."},
-     {impure_list,        4, 2, "Answer with any impure list."},
+     {improper_list,      4, 2, "Answer with any improper list."},
      {which_type,         8, 5, ["Given a list of values, answer with a list",
                                  "stating the type of the corresponding value as follows:",
                                  "  'number' if it is a number",
@@ -34,7 +34,7 @@ quest_list() ->
                                  "  'atom' if it is any other atom",
                                  "  'nil' if it is the empty list",
                                  "  'string' if it is a non-empty list containing only numbers in [0;255]",
-                                 "  'impure_list' if it is an impure",
+                                 "  'improper_list' if it is an improper",
                                  "  '{list,Length}' if it is any other list and has length Length",
                                  "  '{tuple, Size}' if it is a tuple of size Size",
                                  "  '{binary,Size}' if it is a binary and contains Size bytes",
@@ -212,9 +212,9 @@ list_of_length_10() ->
     #quest{generate=fun()->dummy end,
            verify=fun(_,Answer) -> catch(length(Answer))==10 end}.
 
-impure_list() ->
+improper_list() ->
     #quest{generate=fun()->dummy end,
-           verify=fun(_,Answer) -> is_impure_list(Answer) end}.
+           verify=fun(_,Answer) -> is_improper_list(Answer) end}.
 
 
 %%%----------
@@ -249,8 +249,8 @@ correct_type2(X,T) when is_list(X) ->
     case is_latin1_string(X) of
         true -> T==string;
         false ->
-            case is_impure_list(X) of
-                true -> T==impure_list;
+            case is_improper_list(X) of
+                true -> T==improper_list;
                 false -> T=={list, length(X)}
             end
     end;
@@ -790,11 +790,11 @@ fold_int_range(Fun, Acc, Min, Max) when is_function(Fun,2),
 is_nearly_eq(X,Y) ->
     abs(X-Y) < 1.0e-6 * max(abs(X), abs(Y)).
 
-is_impure_list(L) -> is_impure_list(L, 0).
+is_improper_list(L) -> is_improper_list(L, 0).
 
-is_impure_list([],_) -> false;
-is_impure_list([_|T],N) -> is_impure_list(T,N+1);
-is_impure_list(_,N) -> N>0.
+is_improper_list([],_) -> false;
+is_improper_list([_|T],N) -> is_improper_list(T,N+1);
+is_improper_list(_,N) -> N>0.
 
 is_latin1_string([]) -> true;
 is_latin1_string([H|T]) ->
@@ -876,7 +876,7 @@ rnd_any_type() ->
                   fun erlang:make_ref/0,
                   fun () -> [rnd_integer(0,255) || _ <- lists:seq(1,rnd_integer(0,10))] end,
                   fun () -> [rnd_primitive_type() || _ <- lists:seq(1,rnd_integer(0,10))] end,
-                  fun () -> [rnd_primitive_type() || _ <- lists:seq(1,rnd_integer(0,10))] ++ rnd_primitive_type() end, % Impure list
+                  fun () -> [rnd_primitive_type() || _ <- lists:seq(1,rnd_integer(0,10))] ++ rnd_primitive_type() end, % Improper list
                   fun () -> list_to_tuple([rnd_atom() || _ <- lists:seq(1,rnd_integer(0,10))]) end,
                   fun () -> rnd_of([fun()->throw(function_not_supposed_to_be_called) end,
                                     fun(_)->throw(function_not_supposed_to_be_called) end,
