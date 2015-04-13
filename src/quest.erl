@@ -191,9 +191,11 @@ submit(Username, QuestID, SolutionFun) when is_atom(Username),
 
 %%% Set user %%%%%%%%%%%%
 
-set_user(Username) ->
+set_user(Username) when is_atom(Username) ->
     put(?DEFAULT_USERNAME, Username),
-    ok.
+    ok;
+set_user(_Username) ->
+    {error, username_must_be_an_atom}.
 
 %%% Utils %%%%%%%%%
 
